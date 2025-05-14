@@ -1,18 +1,7 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Filter, X, Sliders, Cpu, HardDrive, Globe, Zap } from 'lucide-react';
 
-function PriceFilters() {
-  const [filters, setFilters] = useState({
-    providers: [],
-    regions: [],
-    vCPUs: [1, 16],
-    ram: [1, 64],
-    gpu: false,
-    storage: [0, 1000],
-    instanceTypes: [],
-  });
-
+function PriceFilters({ filters, setFilters }) {
   const providers = [
     { id: 'aws', name: 'AWS', color: 'orange' },
     { id: 'azure', name: 'Azure', color: 'blue' },
@@ -29,9 +18,9 @@ function PriceFilters() {
   ];
 
   const instanceTypes = [
-    { category: 'General Purpose', types: ['t3', 't4g', 'D2s', 'e2'] },
-    { category: 'Compute Optimized', types: ['c5', 'c6g', 'Fsv2', 'c2'] },
-    { category: 'Memory Optimized', types: ['r5', 'r6g', 'Esv3', 'm2'] },
+    { category: 'General Purpose', types: ['t3', 'D2s', 'e2'] },
+    { category: 'Compute Optimized', types: ['c5', 'Fsv2', 'c2'] },
+    { category: 'Memory Optimized', types: ['r5', 'Esv3', 'm2'] },
   ];
 
   const handleProviderToggle = (provider) => {
@@ -75,7 +64,6 @@ function PriceFilters() {
       vCPUs: [1, 16],
       ram: [1, 64],
       gpu: false,
-      storage: [0, 1000],
       instanceTypes: [],
     });
   };

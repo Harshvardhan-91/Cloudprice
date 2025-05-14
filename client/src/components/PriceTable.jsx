@@ -1,24 +1,9 @@
 import { motion } from 'framer-motion';
-import { Table, ArrowUp, ArrowDown, Info } from 'lucide-react';
+import { ArrowUp, ArrowDown, Info } from 'lucide-react';
 import { useState } from 'react';
 
-function PriceTable({ data }) {
-  const [sortConfig, setSortConfig] = useState({ key: 'price', direction: 'asc' });
+function PriceTable({ data, sortBy, sortOrder }) {
   const [hoveredRow, setHoveredRow] = useState(null);
-
-  const handleSort = (key) => {
-    setSortConfig((prev) => ({
-      key,
-      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
-    }));
-  };
-
-  const sortedData = [...data].sort((a, b) => {
-    if (sortConfig.direction === 'asc') {
-      return a[sortConfig.key] > b[sortConfig.key] ? 1 : -1;
-    }
-    return a[sortConfig.key] < b[sortConfig.key] ? 1 : -1;
-  });
 
   const columns = [
     { key: 'provider', label: 'Provider', tooltip: 'Cloud service provider' },
@@ -45,8 +30,7 @@ function PriceTable({ data }) {
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className="group px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-                  onClick={() => handleSort(column.key)}
+                  className="group px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   <div className="flex items-center gap-2">
                     {column.label}
@@ -56,8 +40,8 @@ function PriceTable({ data }) {
                         {column.tooltip}
                       </div>
                     </div>
-                    {sortConfig.key === column.key && (
-                      sortConfig.direction === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+                    {sortBy === column.key && (
+                      sortOrder === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
                     )}
                   </div>
                 </th>
@@ -65,7 +49,7 @@ function PriceTable({ data }) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {sortedData.map((item, index) => (
+            {data.map((item, index) => (
               <motion.tr
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -81,19 +65,20 @@ function PriceTable({ data }) {
                   <div className="flex items-center">
                     <div className={`h-3 w-3 rounded-full mr-2 ${
                       item.provider === 'AWS' ? 'bg-orange-500' :
-                      item.provider === 'Azure' ? 'bg-blue-500' :
-                      'bg-red-500'
+                      item.provider === 'AZURE' ? 'bg-blue-500' :
+                      item.provider === 'GCP' ? 'bg-red-500' :
+                      'bg-gray-500'
                     }`} />
                     <span className="text-sm font-medium text-gray-900">{item.provider}</span>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.region}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.vCPUs}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.ram}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.price.toFixed(3)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.costPerCore.toFixed(3)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.costPerGB.toFixed(3)}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.instanceType}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.region || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.vCPUs || 0}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.ram || 0}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${(item.price || 0).toFixed(3)}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${(item.costPerCore || 0).toFixed(3)}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${(item.costPerGB || 0).toFixed(3)}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.instanceType || 'N/A'}</td>
               </motion.tr>
             ))}
           </tbody>

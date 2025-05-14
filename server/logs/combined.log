@@ -74,3 +74,32 @@
 {"level":"error","message":"Failed to initialize Azure client:","timestamp":"2025-05-14T19:31:20.891Z"}
 {"level":"info","message":"GCP client initialized","timestamp":"2025-05-14T19:31:20.958Z"}
 {"level":"info","message":"Price update cron job scheduled (every 3 days at midnight UTC)","timestamp":"2025-05-14T19:31:21.012Z"}
+{"level":"warn","message":"AWS credentials missing or invalid; AWS client not initialized","timestamp":"2025-05-14T19:48:22.863Z"}
+{"clientId":"9561bb70-6b9a-4260-a719-697dff25d4bd","level":"info","message":"Attempting to initialize Azure client with credentials:","subscriptionId":"087cb608-66a9-4dc0-8734-ae888dd9aa8f","tenantId":"0f16d98d-7fed-416e-8901-543b4e125d5c","timestamp":"2025-05-14T19:48:22.871Z"}
+{"level":"error","message":"Failed to initialize Azure client:","timestamp":"2025-05-14T19:48:22.872Z"}
+{"level":"info","message":"GCP client initialized","timestamp":"2025-05-14T19:48:22.953Z"}
+{"level":"info","message":"Price update cron job scheduled (every 3 days at midnight UTC)","timestamp":"2025-05-14T19:48:23.073Z"}
+{"level":"warn","message":"AWS credentials missing or invalid; AWS client not initialized","timestamp":"2025-05-14T19:48:54.835Z"}
+{"clientId":"9561bb70-6b9a-4260-a719-697dff25d4bd","level":"info","message":"Attempting to initialize Azure client with credentials:","subscriptionId":"087cb608-66a9-4dc0-8734-ae888dd9aa8f","tenantId":"0f16d98d-7fed-416e-8901-543b4e125d5c","timestamp":"2025-05-14T19:48:54.841Z"}
+{"level":"error","message":"Failed to initialize Azure client:","timestamp":"2025-05-14T19:48:54.842Z"}
+{"level":"info","message":"GCP client initialized","timestamp":"2025-05-14T19:48:54.891Z"}
+{"level":"info","message":"Price update cron job scheduled (every 3 days at midnight UTC)","timestamp":"2025-05-14T19:48:54.939Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T19:49:01.101Z"}
+{"level":"info","message":"Found 0 GCP instances","timestamp":"2025-05-14T19:49:01.155Z"}
+{"level":"warn","message":"No GCP instances found; inserting dummy instance","timestamp":"2025-05-14T19:49:01.160Z"}
+{"level":"info","message":"Inserted 1 dummy GCP instance","timestamp":"2025-05-14T19:49:01.223Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T19:49:14.927Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T19:49:14.975Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T19:55:24.464Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T19:55:24.503Z"}
+{"level":"warn","message":"AWS credentials missing or invalid; AWS client not initialized","timestamp":"2025-05-14T19:57:27.880Z"}
+{"clientId":"9561bb70-6b9a-4260-a719-697dff25d4bd","level":"info","message":"Attempting to initialize Azure client with credentials:","subscriptionId":"087cb608-66a9-4dc0-8734-ae888dd9aa8f","tenantId":"0f16d98d-7fed-416e-8901-543b4e125d5c","timestamp":"2025-05-14T19:57:27.884Z"}
+{"level":"error","message":"Failed to initialize Azure client:","timestamp":"2025-05-14T19:57:27.885Z"}
+{"level":"info","message":"GCP client initialized","timestamp":"2025-05-14T19:57:27.970Z"}
+{"level":"info","message":"Price update cron job scheduled (every 3 days at midnight UTC)","timestamp":"2025-05-14T19:57:28.036Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T19:57:43.136Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T19:57:43.190Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T19:57:47.638Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T19:57:47.960Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:14:22.365Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:14:22.488Z"}

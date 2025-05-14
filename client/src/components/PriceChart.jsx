@@ -21,12 +21,12 @@ function PriceChart({ data }) {
   const providerData = data.reduce((acc, item) => {
     const existing = acc.find(p => p.provider === item.provider);
     if (existing) {
-      existing.price += item.price;
+      existing.price += item.price || 0;
       existing.count += 1;
     } else {
       acc.push({
         provider: item.provider,
-        price: item.price,
+        price: item.price || 0,
         count: 1,
       });
     }
@@ -38,9 +38,9 @@ function PriceChart({ data }) {
 
   const performanceData = data.map(item => ({
     name: item.instanceType,
-    price: item.price,
-    costPerCore: item.costPerCore,
-    costPerGB: item.costPerGB,
+    price: item.price || 0,
+    costPerCore: item.costPerCore || 0,
+    costPerGB: item.costPerGB || 0,
   }));
 
   return (
@@ -142,7 +142,7 @@ function PriceChart({ data }) {
               <Tooltip
                 formatter={(value, name) => [
                   `$${value.toFixed(3)}`,
-                  name === 'costPerCore' ? 'Cost per Core' : 'Cost per GB',
+                  name === 'costPerCore' ? 'Cost per Core' : name === 'costPerGB' ? 'Cost per GB' : 'Price',
                 ]}
               />
               <Legend />
