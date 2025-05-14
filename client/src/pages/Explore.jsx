@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Table, BarChart2, Sliders, Search, RefreshCw } from 'lucide-react';
 import PriceFilters from '../components/PriceFilters';
 import PriceTable from '../components/PriceTable';
 import PriceChart from '../components/PriceChart';
@@ -13,6 +14,8 @@ const sampleData = [
     ram: 8,
     price: 0.1,
     instanceType: 't3.medium',
+    costPerCore: 0.05,
+    costPerGB: 0.0125,
   },
   {
     provider: 'Azure',
@@ -21,6 +24,8 @@ const sampleData = [
     ram: 16,
     price: 0.2,
     instanceType: 'D4s_v5',
+    costPerCore: 0.05,
+    costPerGB: 0.0125,
   },
   {
     provider: 'GCP',
@@ -29,47 +34,146 @@ const sampleData = [
     ram: 7.5,
     price: 0.08,
     instanceType: 'e2-standard-2',
+    costPerCore: 0.04,
+    costPerGB: 0.0107,
   },
 ];
 
 function Explore() {
-  const [view, setView] = useState('table'); // Toggle between table and chart
+  const [view, setView] = useState('table');
+  const [isFilterOpen, setIsFilterOpen] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('price');
+  const [sortOrder, setSortOrder] = useState('asc');
+
+  const toggleFilter = () => setIsFilterOpen(!isFilterOpen);
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.h1
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-4xl sm:text-5xl font-bold text-center mb-12"
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
         >
-          Compare Cloud Prices
-        </motion.h1>
-        <PriceFilters />
-        <div className="flex justify-center mb-6">
-          <button
-            onClick={() => setView('table')}
-            className={`px-4 py-2 mx-2 rounded-lg ${
-              view === 'table' ? 'custom-gradient text-white' : 'bg-gray-200'
-            }`}
-          >
-            Table View
-          </button>
-          <button
-            onClick={() => setView('chart')}
-            className={`px-4 py-2 mx-2 rounded-lg ${
-              view === 'chart' ? 'custom-gradient text-white' : 'bg-gray-200'
-            }`}
-          >
-            Chart View
-          </button>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Cloud Instance Explorer
+          </h1>
+          <p className="text-lg text-gray-600">
+            Compare VM prices across major cloud providers and find the best fit for your workload.
+          </p>
+        </motion.div>
+
+        {/* Search and Controls */}
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="flex-1 w-full md:w-auto">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <input
+                  type="text"
+                  placeholder="Search instances..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={toggleFilter}
+                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                <Sliders className="h-5 w-5" />
+                {isFilterOpen ? 'Hide Filters' : 'Show Filters'}
+              </button>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="price">Price</option>
+                <option value="costPerCore">Cost per Core</option>
+                <option value="costPerGB">Cost per GB</option>
+                <option value="vCPUs">vCPUs</option>
+                <option value="ram">RAM</option>
+              </select>
+              <button
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                className="p-2 text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                {sortOrder === 'asc' ? '↑' : '↓'}
+              </button>
+            </div>
+          </div>
         </div>
-        {view === 'table' ? (
-          <PriceTable data={sampleData} />
-        ) : (
-          <PriceChart data={sampleData} />
-        )}
+
+        {/* Filters */}
+        <AnimatePresence>
+          {isFilterOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <PriceFilters />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* View Toggle */}
+        <div className="flex justify-center mb-6">
+          <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-white">
+            <button
+              onClick={() => setView('table')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+                view === 'table'
+                  ? 'bg-blue-500 text-white'
+                  : 'text-gray-700 hover:text-blue-600'
+              }`}
+            >
+              <Table className="h-5 w-5" />
+              Table
+            </button>
+            <button
+              onClick={() => setView('chart')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+                view === 'chart'
+                  ? 'bg-blue-500 text-white'
+                  : 'text-gray-700 hover:text-blue-600'
+              }`}
+            >
+              <BarChart2 className="h-5 w-5" />
+              Charts
+            </button>
+          </div>
+        </div>
+
+        {/* Data Display */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={view}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {view === 'table' ? (
+              <PriceTable data={sampleData} />
+            ) : (
+              <PriceChart data={sampleData} />
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Last Updated */}
+        <div className="mt-6 text-center text-sm text-gray-500 flex items-center justify-center gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Last updated: {new Date().toLocaleDateString()}
+        </div>
       </div>
     </section>
   );
