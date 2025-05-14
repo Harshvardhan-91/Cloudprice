@@ -1,0 +1,28 @@
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:03:48.702Z"}
+{"errorLabelSet":{},"level":"error","message":"MongoDB connection error: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","reason":{"commonWireVersion":0,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"logicalSessionTimeoutMinutes":null,"maxElectionId":null,"maxSetVersion":null,"servers":{"localhost:27017":{"$clusterTime":null,"address":"localhost:27017","arbiters":[],"electionId":null,"error":{"beforeHandshake":false,"errorLabelSet":{}},"hosts":[],"iscryptd":false,"lastUpdateTime":354809134,"lastWriteDate":0,"logicalSessionTimeoutMinutes":null,"maxBsonObjectSize":null,"maxMessageSizeBytes":null,"maxWireVersion":0,"maxWriteBatchSize":null,"me":null,"minRoundTripTime":0,"minWireVersion":0,"passives":[],"primary":null,"roundTripTime":-1,"setName":null,"setVersion":null,"tags":{},"topologyVersion":null,"type":"Unknown"}},"setName":null,"stale":false,"type":"Unknown"},"stack":"MongooseServerSelectionError: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017\n    at _handleConnectionErrors (C:\\Users\\agarw\\Projects\\Cloudprice\\server\\node_modules\\mongoose\\lib\\connection.js:1165:11)\n    at NativeConnection.openUri (C:\\Users\\agarw\\Projects\\Cloudprice\\server\\node_modules\\mongoose\\lib\\connection.js:1096:11)","timestamp":"2025-05-14T13:04:18.696Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:10:27.745Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-14T13:10:28.358Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:11:43.374Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-14T13:11:43.954Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:11:57.279Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-14T13:11:57.880Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:11:59.689Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-14T13:12:00.194Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:12:07.676Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-14T13:12:08.293Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:12:09.911Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-14T13:12:10.458Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:12:49.993Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-14T13:12:50.608Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:20:02.558Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-14T13:20:03.246Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:20:15.766Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-14T13:20:16.362Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:20:56.554Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-14T13:20:57.068Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:20:59.569Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-14T13:21:00.186Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:21:08.143Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-14T13:21:08.808Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-14T13:21:10.610Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-14T13:21:11.106Z"}
