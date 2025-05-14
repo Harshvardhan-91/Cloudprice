@@ -9,7 +9,7 @@ const logger = require('../utils/logger');
 class CloudProviderService {
   constructor() {
     // Initialize AWS client
-    if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+    if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_ACCESS_KEY_ID !== 'your_aws_access_key') {
       this.awsClient = new EC2Client({
         region: process.env.AWS_REGION || 'us-east-1',
         credentials: {
@@ -19,45 +19,69 @@ class CloudProviderService {
       });
       logger.info('AWS client initialized');
     } else {
-      logger.warn('AWS credentials missing; AWS client not initialized');
+      logger.warn('AWS credentials missing or invalid; AWS client not initialized');
       this.awsClient = null;
     }
 
     // Initialize Azure client
+    const azureCredentials = {
+      clientId: process.env.AZURE_CLIENT_ID,
+      clientSecret: process.env.AZURE_CLIENT_SECRET,
+      tenantId: process.env.AZURE_TENANT_ID,
+      subscriptionId: process.env.AZURE_SUBSCRIPTION_ID
+    };
     if (
-      process.env.AZURE_CLIENT_ID &&
-      process.env.AZURE_CLIENT_SECRET &&
-      process.env.AZURE_TENANT_ID &&
-      process.env.AZURE_SUBSCRIPTION_ID
+      azureCredentials.clientId &&
+      azureCredentials.clientSecret &&
+      azureCredentials.tenantId &&
+      azureCredentials.subscriptionId
     ) {
       try {
+        logger.info('Attempting to initialize Azure client with credentials:', {
+          clientId: azureCredentials.clientId,
+          tenantId: azureCredentials.tenantId,
+          subscriptionId: azureCredentials.subscriptionId
+        });
         this.azureClient = new ComputeManagementClient({
           credentials: {
-            clientId: process.env.AZURE_CLIENT_ID,
-            clientSecret: process.env.AZURE_CLIENT_SECRET,
-            tenantId: process.env.AZURE_TENANT_ID
+            clientId: azureCredentials.clientId,
+            clientSecret: azureCredentials.clientSecret,
+            tenantId: azureCredentials.tenantId
           },
-          subscriptionId: process.env.AZURE_SUBSCRIPTION_ID
+          subscriptionId: azureCredentials.subscriptionId
         });
-        logger.info('Azure client initialized');
+        logger.info('Azure client initialized successfully');
       } catch (error) {
-        logger.error('Failed to initialize Azure client:', error);
+        logger.error('Failed to initialize Azure client:', error.message);
         this.azureClient = null;
       }
     } else {
-      logger.warn('Azure credentials incomplete; Azure client not initialized');
+      logger.warn('Azure credentials incomplete:', {
+        clientId: !!azureCredentials.clientId,
+        clientSecret: !!azureCredentials.clientSecret,
+        tenantId: !!azureCredentials.tenantId,
+        subscriptionId: !!azureCredentials.subscriptionId
+      });
       this.azureClient = null;
     }
 
     // Initialize GCP billing client
     if (process.env.GOOGLE_PROJECT_ID && process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-      this.gcpBillingClient = new CloudBillingClient({
-        projectId: process.env.GOOGLE_PROJECT_ID,
-        keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
-      });
-      logger.info('GCP client initialized');
+      try {
+        this.gcpBillingClient = new CloudBillingClient({
+          projectId: process.env.GOOGLE_PROJECT_ID,
+          keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+        });
+        logger.info('GCP client initialized');
+      } catch (error) {
+        logger.error('Failed to initialize GCP client:', error.message);
+        this.gcpBillingClient = null;
+      }
     } else {
-      logger.warn('GCP credentials missing; GCP client not initialized');
+      logger.warn('GCP credentials missing:', {
+        projectId: !!process.env.GOOGLE_PROJECT_ID,
+        credentials: !!process.env.GOOGLE_APPLICATION_CREDENTIALS
+      });
       this.gcpBillingClient = null;
     }
   }
@@ -97,7 +121,7 @@ class CloudProviderService {
       logger.info(`Inserted ${instances.length} AWS instances`);
       return instances;
     } catch (error) {
-      logger.error('Error fetching AWS instances:', error);
+      logger.error('Error fetching AWS instances:', error.message);
       throw error;
     }
   }
@@ -138,7 +162,7 @@ class CloudProviderService {
       logger.info(`Inserted ${instances.length} Azure instances`);
       return instances;
     } catch (error) {
-      logger.error('Error fetching Azure instances:', error);
+      logger.error('Error fetching Azure instances:', error.message);
       throw error;
     }
   }
@@ -155,6 +179,7 @@ class CloudProviderService {
       const client = await auth.getClient();
       const accessToken = await client.getAccessToken();
 
+      logger.info('Fetching GCP SKUs from Cloud Billing API');
       const response = await axios.get(
         `https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus`,
         {
@@ -169,6 +194,8 @@ class CloudProviderService {
                sku.category.usageType === 'OnDemand' &&
                sku.serviceRegions.includes(process.env.GCP_ZONE?.split('-')[0] || 'us-central1')
       );
+
+      logger.info(`Found ${skus.length} GCP SKUs`);
 
       const instances = skus.map(sku => ({
         provider: 'gcp',
@@ -200,7 +227,7 @@ class CloudProviderService {
       logger.info(`Inserted ${instances.length} GCP instances`);
       return instances;
     } catch (error) {
-      logger.error('Error fetching GCP instances:', error);
+      logger.error('Error fetching GCP instances:', error.message);
       throw error;
     }
   }

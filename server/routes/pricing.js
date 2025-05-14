@@ -8,13 +8,7 @@ router.get('/aws', async (req, res) => {
   try {
     logger.info('Fetching AWS instances');
     const instances = await Instance.find({ provider: 'aws' }).limit(100);
-    if (instances.length === 0) {
-      logger.info('No AWS instances found');
-      return res.status(404).json({
-        status: 'error',
-        message: 'No AWS instances found in the database'
-      });
-    }
+    logger.info(`Found ${instances.length} AWS instances`);
     res.json({ status: 'success', data: instances });
   } catch (error) {
     logger.error('Error fetching AWS instances:', error);
@@ -27,13 +21,7 @@ router.get('/gcp', async (req, res) => {
   try {
     logger.info('Fetching GCP instances');
     const instances = await Instance.find({ provider: 'gcp' }).limit(100);
-    if (instances.length === 0) {
-      logger.info('No GCP instances found');
-      return res.status(404).json({
-        status: 'error',
-        message: 'No GCP instances found in the database'
-      });
-    }
+    logger.info(`Found ${instances.length} GCP instances`);
     res.json({ status: 'success', data: instances });
   } catch (error) {
     logger.error('Error fetching GCP instances:', error);
@@ -46,13 +34,7 @@ router.get('/azure', async (req, res) => {
   try {
     logger.info('Fetching Azure instances');
     const instances = await Instance.find({ provider: 'azure' }).limit(100);
-    if (instances.length === 0) {
-      logger.info('No Azure instances found');
-      return res.status(404).json({
-        status: 'error',
-        message: 'No Azure instances found in the database'
-      });
-    }
+    logger.info(`Found ${instances.length} Azure instances`);
     res.json({ status: 'success', data: instances });
   } catch (error) {
     logger.error('Error fetching Azure instances:', error);
@@ -131,6 +113,7 @@ router.get('/', async (req, res) => {
       .sort(sort)
       .limit(100);
 
+    logger.info(`Found ${instances.length} instances with filters`);
     res.json({
       status: 'success',
       data: instances
@@ -162,6 +145,7 @@ router.post('/compare', async (req, res) => {
       .sort({ 'pricing.onDemand': 1 })
       .limit(10);
 
+    logger.info(`Found ${instances.length} instances for comparison`);
     res.json({
       status: 'success',
       data: instances

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Table, BarChart2, Sliders, Search, RefreshCw, AlertCircle } from 'lucide-react';
@@ -31,6 +32,9 @@ function Explore() {
     try {
       const res = await fetchInstances(provider);
       setData(res.data || []);
+      if (res.data.length === 0) {
+        setError(`No ${provider.toUpperCase()} instances found. Try refreshing the data.`);
+      }
     } catch (err) {
       setError(err.message);
     } finally {

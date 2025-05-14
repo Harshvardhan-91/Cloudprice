@@ -16,6 +16,7 @@ console.log('AZURE_CLIENT_ID:', process.env.AZURE_CLIENT_ID);
 console.log('AZURE_CLIENT_SECRET:', process.env.AZURE_CLIENT_SECRET ? 'Set' : 'Not set');
 console.log('AWS_ACCESS_KEY_ID:', process.env.AWS_ACCESS_KEY_ID);
 console.log('GOOGLE_PROJECT_ID:', process.env.GOOGLE_PROJECT_ID);
+console.log('GOOGLE_APPLICATION_CREDENTIALS:', process.env.GOOGLE_APPLICATION_CREDENTIALS);
 
 // Initialize Express app
 const app = express();
@@ -47,10 +48,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cloudprice', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => logger.info('Connected to MongoDB'))
   .catch(err => logger.error('MongoDB connection error:', err));
 
