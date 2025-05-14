@@ -103,3 +103,37 @@
 {"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T19:57:47.960Z"}
 {"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:14:22.365Z"}
 {"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:14:22.488Z"}
+{"level":"info","message":"Fetching Azure instances","timestamp":"2025-05-14T20:18:55.839Z"}
+{"level":"info","message":"Found 0 Azure instances","timestamp":"2025-05-14T20:18:55.884Z"}
+{"level":"warn","message":"No Azure instances found; inserting dummy instance","timestamp":"2025-05-14T20:18:55.884Z"}
+{"level":"info","message":"Inserted 1 dummy Azure instance","timestamp":"2025-05-14T20:18:56.007Z"}
+{"level":"info","message":"Fetching AWS instances","timestamp":"2025-05-14T20:19:00.082Z"}
+{"level":"info","message":"Found 0 AWS instances","timestamp":"2025-05-14T20:19:00.127Z"}
+{"level":"warn","message":"No AWS instances found; inserting dummy instance","timestamp":"2025-05-14T20:19:00.128Z"}
+{"level":"info","message":"Inserted 1 dummy AWS instance","timestamp":"2025-05-14T20:19:00.172Z"}
+{"level":"info","message":"Fetching Azure instances","timestamp":"2025-05-14T20:19:35.188Z"}
+{"level":"info","message":"Found 1 Azure instances","timestamp":"2025-05-14T20:19:35.263Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:19:38.819Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:19:38.878Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:28:02.614Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:28:02.664Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:28:02.670Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:28:02.714Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:28:10.500Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:28:10.547Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:30:51.446Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:30:51.486Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:30:51.489Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:30:51.531Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:35:56.180Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:35:56.229Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:35:56.235Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:35:56.283Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:36:58.186Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:36:58.243Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:36:58.257Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:36:58.322Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:38:30.884Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:38:30.924Z"}
+{"level":"info","message":"Fetching GCP instances","timestamp":"2025-05-14T20:38:30.930Z"}
+{"level":"info","message":"Found 1 GCP instances","timestamp":"2025-05-14T20:38:30.971Z"}
