@@ -1,42 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Table, BarChart2, Sliders, Search, RefreshCw } from 'lucide-react';
+import { Table, BarChart2, Sliders, Search, RefreshCw, AlertCircle } from 'lucide-react';
 import PriceFilters from '../components/PriceFilters';
 import PriceTable from '../components/PriceTable';
 import PriceChart from '../components/PriceChart';
+import { fetchInstances } from '../api';
 
-// Sample data (replace with API data in Phase 5)
-const sampleData = [
-  {
-    provider: 'AWS',
-    region: 'us-east-1',
-    vCPUs: 2,
-    ram: 8,
-    price: 0.1,
-    instanceType: 't3.medium',
-    costPerCore: 0.05,
-    costPerGB: 0.0125,
-  },
-  {
-    provider: 'Azure',
-    region: 'eastus',
-    vCPUs: 4,
-    ram: 16,
-    price: 0.2,
-    instanceType: 'D4s_v5',
-    costPerCore: 0.05,
-    costPerGB: 0.0125,
-  },
-  {
-    provider: 'GCP',
-    region: 'us-central1',
-    vCPUs: 2,
-    ram: 7.5,
-    price: 0.08,
-    instanceType: 'e2-standard-2',
-    costPerCore: 0.04,
-    costPerGB: 0.0107,
-  },
+const PROVIDERS = [
+  { id: 'aws', name: 'AWS' },
+  { id: 'azure', name: 'Azure' },
+  { id: 'gcp', name: 'GCP' },
 ];
 
 function Explore() {
@@ -45,8 +18,29 @@ function Explore() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('price');
   const [sortOrder, setSortOrder] = useState('asc');
+  const [provider, setProvider] = useState('gcp');
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const toggleFilter = () => setIsFilterOpen(!isFilterOpen);
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetchInstances(provider);
+      setData(res.data || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [provider]);
 
   return (
     <section className="min-h-screen bg-gray-50 py-8">
@@ -55,6 +49,7 @@ function Explore() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
           className="mb-8"
         >
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -64,6 +59,19 @@ function Explore() {
             Compare VM prices across major cloud providers and find the best fit for your workload.
           </p>
         </motion.div>
+
+        {/* Provider Selector */}
+        <div className="mb-6 flex justify-end">
+          <select
+            value={provider}
+            onChange={e => setProvider(e.target.value)}
+            className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            {PROVIDERS.map(p => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+        </div>
 
         {/* Search and Controls */}
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
@@ -161,10 +169,31 @@ function Explore() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            {view === 'table' ? (
-              <PriceTable data={sampleData} />
+            {loading ? (
+              <div className="text-center py-10 text-gray-500">
+                Loading {provider.toUpperCase()} instances...
+              </div>
+            ) : error ? (
+              <div className="text-center py-10 text-red-500 flex flex-col items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-6 w-6" />
+                  <span>{error}</span>
+                </div>
+                <button
+                  onClick={fetchData}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : data.length === 0 ? (
+              <div className="text-center py-10 text-gray-500">
+                No instances found for {provider.toUpperCase()}
+              </div>
+            ) : view === 'table' ? (
+              <PriceTable data={data} />
             ) : (
-              <PriceChart data={sampleData} />
+              <PriceChart data={data} />
             )}
           </motion.div>
         </AnimatePresence>

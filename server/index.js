@@ -1,10 +1,21 @@
-require('dotenv').config();
+require('dotenv').config({ path: './.env' });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
 const winston = require('winston');
+const { schedulePriceUpdates } = require('./utils/cron');
+
+// Debug environment variables
+console.log('Environment variables:');
+console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
+console.log('AZURE_SUBSCRIPTION_ID:', process.env.AZURE_SUBSCRIPTION_ID);
+console.log('AZURE_TENANT_ID:', process.env.AZURE_TENANT_ID);
+console.log('AZURE_CLIENT_ID:', process.env.AZURE_CLIENT_ID);
+console.log('AZURE_CLIENT_SECRET:', process.env.AZURE_CLIENT_SECRET ? 'Set' : 'Not set');
+console.log('AWS_ACCESS_KEY_ID:', process.env.AWS_ACCESS_KEY_ID);
+console.log('GOOGLE_PROJECT_ID:', process.env.GOOGLE_PROJECT_ID);
 
 // Initialize Express app
 const app = express();
@@ -36,7 +47,10 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cloudprice')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cloudprice', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
   .then(() => logger.info('Connected to MongoDB'))
   .catch(err => logger.error('MongoDB connection error:', err));
 
@@ -45,9 +59,14 @@ const pricingRoutes = require('./routes/pricing');
 const comparisonRoutes = require('./routes/comparison');
 const providerRoutes = require('./routes/providers');
 
-app.use('/api/pricing', pricingRoutes);
-app.use('/api/comparison', comparisonRoutes);
-app.use('/api/providers', providerRoutes);
+app.use('/api/v1/pricing', pricingRoutes);
+app.use('/api/v1/comparison', comparisonRoutes);
+app.use('/api/v1/providers', providerRoutes);
+
+// Health check endpoint
+app.get('/api/v1/health', (req, res) => {
+  res.json({ status: 'success', message: 'Server is running', timestamp: new Date() });
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -59,8 +78,23 @@ app.use((err, req, res, next) => {
   });
 });
 
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    status: 'error',
+    message: `Cannot ${req.method} ${req.originalUrl}`
+  });
+});
+
+// Schedule price updates
+try {
+  schedulePriceUpdates();
+} catch (error) {
+  logger.error('Failed to schedule price updates:', error);
+}
+
 // Start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
-}); 
+});
