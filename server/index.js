@@ -37,7 +37,9 @@ const logger = winston.createLogger({
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: '*'
+}));
 app.use(express.json());
 
 // Rate limiting
