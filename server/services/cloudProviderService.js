@@ -1,312 +1,301 @@
-const { EC2Client, DescribeInstanceTypesCommand } = require('@aws-sdk/client-ec2');
-const { ComputeManagementClient } = require('@azure/arm-compute');
-const { CloudBillingClient } = require('@google-cloud/billing');
-const axios = require('axios');
-const { GoogleAuth } = require('google-auth-library');
-const Instance = require('../models/Instance');
+const { google } = require('googleapis');
+const AWS = require('aws-sdk');
+const { DefaultAzureCredential } = require('@azure/identity');
+const { CostManagementClient } = require('@azure/arm-costmanagement');
 const logger = require('../utils/logger');
 
 class CloudProviderService {
   constructor() {
-    // Initialize AWS client
-    if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_ACCESS_KEY_ID !== 'your_aws_access_key') {
-      this.awsClient = new EC2Client({
-        region: process.env.AWS_REGION || 'us-east-1',
-        credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-        }
+    this.gcpClient = null;
+    this.awsClient = null;
+    this.azureClient = null;
+
+    // Initialize GCP client
+    try {
+      const auth = new google.auth.GoogleAuth({
+        credentials: process.env.GOOGLE_CREDENTIALS ? JSON.parse(process.env.GOOGLE_CREDENTIALS) : undefined,
+        scopes: ['https://www.googleapis.com/auth/cloud-billing'],
       });
-      logger.info('AWS client initialized');
-    } else {
+      this.gcpClient = google.cloudbilling({ version: 'v1', auth });
+      logger.info('GCP client initialized successfully');
+    } catch (error) {
+      logger.error('Failed to initialize GCP client:', error.message);
+      logger.error('GCP initialization error details:', error);
+    }
+
+    // Initialize AWS client
+    try {
+      const awsConfig = {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        region: process.env.AWS_REGION,
+      };
+      if (!awsConfig.accessKeyId || !awsConfig.secretAccessKey) {
+        throw new Error('AWS credentials missing or invalid');
+      }
+      this.awsClient = new AWS.Pricing(awsConfig);
+      logger.info('AWS client initialized successfully');
+    } catch (error) {
       logger.warn('AWS credentials missing or invalid; AWS client not initialized');
-      this.awsClient = null;
+      logger.error('AWS initialization error:', error.message);
     }
 
     // Initialize Azure client
-    const azureCredentials = {
-      clientId: process.env.AZURE_CLIENT_ID,
-      clientSecret: process.env.AZURE_CLIENT_SECRET,
-      tenantId: process.env.AZURE_TENANT_ID,
-      subscriptionId: process.env.AZURE_SUBSCRIPTION_ID
+    try {
+      const azureCredentials = new DefaultAzureCredential();
+      this.azureClient = new CostManagementClient(azureCredentials, process.env.AZURE_SUBSCRIPTION_ID);
+      logger.info('Azure client initialized successfully');
+    } catch (error) {
+      logger.error('Failed to initialize Azure client:', error.message);
+      logger.error('Azure initialization error details:', error);
+    }
+  }
+
+  getDummyGCPInstance() {
+    return {
+      provider: 'gcp',
+      instanceType: 'e2-micro',
+      region: 'us-central1',
+      specs: {
+        vCPUs: 2,
+        memory: 1,
+        storage: 0,
+        gpu: false,
+        gpuType: null,
+        gpuCount: 0
+      },
+      pricing: {
+        onDemand: 0.01,
+        reserved: 0,
+        spot: 0
+      },
+      category: 'general',
+      lastUpdated: new Date()
     };
-    if (
-      azureCredentials.clientId &&
-      azureCredentials.clientSecret &&
-      azureCredentials.tenantId &&
-      azureCredentials.subscriptionId
-    ) {
-      try {
-        logger.info('Attempting to initialize Azure client with credentials:', {
-          clientId: azureCredentials.clientId,
-          tenantId: azureCredentials.tenantId,
-          subscriptionId: azureCredentials.subscriptionId
-        });
-        this.azureClient = new ComputeManagementClient({
-          credentials: {
-            clientId: azureCredentials.clientId,
-            clientSecret: azureCredentials.clientSecret,
-            tenantId: azureCredentials.tenantId
-          },
-          subscriptionId: azureCredentials.subscriptionId
-        });
-        logger.info('Azure client initialized successfully');
-      } catch (error) {
-        logger.error('Failed to initialize Azure client:', error.message);
-        this.azureClient = null;
-      }
-    } else {
-      logger.warn('Azure credentials incomplete:', {
-        clientId: !!azureCredentials.clientId,
-        clientSecret: !!azureCredentials.clientSecret,
-        tenantId: !!azureCredentials.tenantId,
-        subscriptionId: !!azureCredentials.subscriptionId
-      });
-      this.azureClient = null;
+  }
+
+  getDummyAWSInstance() {
+    return {
+      provider: 'aws',
+      instanceType: 't3.micro',
+      region: 'us-east-1',
+      specs: {
+        vCPUs: 2,
+        memory: 1,
+        storage: 0,
+        gpu: false,
+        gpuType: null,
+        gpuCount: 0
+      },
+      pricing: {
+        onDemand: 0.0104,
+        reserved: 0,
+        spot: 0
+      },
+      category: 'general',
+      lastUpdated: new Date()
+    };
+  }
+
+  getDummyAzureInstance() {
+    return {
+      provider: 'azure',
+      instanceType: 'D2s v3',
+      region: 'eastus',
+      specs: {
+        vCPUs: 2,
+        memory: 8,
+        storage: 0,
+        gpu: false,
+        gpuType: null,
+        gpuCount: 0
+      },
+      pricing: {
+        onDemand: 0.096,
+        reserved: 0,
+        spot: 0
+      },
+      category: 'general',
+      lastUpdated: new Date()
+    };
+  }
+
+  async fetchGCPInstances() {
+    if (!this.gcpClient) {
+      logger.error('GCP client not initialized');
+      return [this.getDummyGCPInstance()];
     }
 
-    // Initialize GCP billing client
-    if (process.env.GOOGLE_PROJECT_ID && (process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.GOOGLE_CREDENTIALS)) {
-      try {
-        const gcpOptions = { projectId: process.env.GOOGLE_PROJECT_ID };
-        if (process.env.GOOGLE_CREDENTIALS) {
-          gcpOptions.credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
-        } else {
-          gcpOptions.keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-        }
-        this.gcpBillingClient = new CloudBillingClient(gcpOptions);
-        logger.info('GCP client initialized');
-      } catch (error) {
-        logger.error('Failed to initialize GCP client:', error.message);
-        this.gcpBillingClient = null;
-      }
-    } else {
-      logger.warn('GCP credentials missing:', {
-        projectId: !!process.env.GOOGLE_PROJECT_ID,
-        credentials: !!(process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.GOOGLE_CREDENTIALS)
+    try {
+      logger.info('Fetching GCP instances using Cloud Billing Catalog API');
+      const projectId = process.env.GOOGLE_PROJECT_ID;
+      const response = await this.gcpClient.services.list({
+        parent: `projects/${projectId}`,
       });
-      this.gcpBillingClient = null;
+
+      logger.info('GCP services.list response:', JSON.stringify(response.data, null, 2));
+
+      const computeService = response.data.services.find(service =>
+        service.displayName.includes('Compute Engine')
+      );
+
+      if (!computeService) {
+        logger.error('Compute Engine service not found in GCP services');
+        return [this.getDummyGCPInstance()];
+      }
+
+      const skusResponse = await this.gcpClient.services.skus.list({
+        parent: computeService.name,
+        filter: 'category.resourceFamily=Compute AND category.usageType=OnDemand',
+      });
+
+      logger.info('GCP skus.list response:', JSON.stringify(skusResponse.data, null, 2));
+
+      const instances = skusResponse.data.skus
+        .filter(sku =>
+          sku.description.includes('Instance') &&
+          sku.category.resourceGroup === 'N1Standard'
+        )
+        .map(sku => {
+          const pricingInfo = sku.pricingInfo[0];
+          const pricePerHour = pricingInfo.pricingExpression.tieredRates[0].unitPrice.nano / 1e9 / 730; // Convert nano-units to USD/hour
+          return {
+            provider: 'gcp',
+            instanceType: sku.description.match(/N1 Standard-(\d+)/)?.[0] || 'unknown',
+            region: sku.serviceRegions[0] || 'us-central1',
+            specs: {
+              vCPUs: parseInt(sku.description.match(/(\d+)/)?.[0]) || 2,
+              memory: 3.75 * (parseInt(sku.description.match(/(\d+)/)?.[0]) || 2), // N1Standard has 3.75 GB per vCPU
+              storage: 0,
+              gpu: false,
+              gpuType: null,
+              gpuCount: 0
+            },
+            pricing: {
+              onDemand: pricePerHour,
+              reserved: 0,
+              spot: 0
+            },
+            category: 'general',
+            lastUpdated: new Date()
+          };
+        });
+
+      logger.info(`Found ${instances.length} GCP instances`);
+      return instances.length > 0 ? instances : [this.getDummyGCPInstance()];
+    } catch (error) {
+      logger.error('Failed to fetch GCP instances:', error.message);
+      logger.error('GCP fetch error details:', JSON.stringify(error, null, 2));
+      return [this.getDummyGCPInstance()];
     }
   }
 
   async fetchAWSInstances() {
     if (!this.awsClient) {
-      logger.error('AWS client not initialized; cannot fetch instances');
-      throw new Error('AWS client not initialized');
+      logger.warn('AWS client not initialized');
+      return [this.getDummyAWSInstance()];
     }
+
     try {
-      const command = new DescribeInstanceTypesCommand({});
-      const response = await this.awsClient.send(command);
-
-      const instances = response.InstanceTypes.map(instance => ({
-        provider: 'aws',
-        instanceType: instance.InstanceType,
-        region: process.env.AWS_REGION || 'us-east-1',
-        specs: {
-          vCPUs: instance.VCpuInfo.DefaultVCpus,
-          memory: instance.MemoryInfo.SizeInMiB / 1024, // Convert to GB
-          storage: instance.InstanceStorageInfo?.TotalSizeInGB || 0,
-          gpu: instance.GpuInfo?.Gpus?.length > 0,
-          gpuType: instance.GpuInfo?.Gpus?.[0]?.Name || null,
-          gpuCount: instance.GpuInfo?.Gpus?.length || 0
-        },
-        pricing: {
-          onDemand: 0, // Placeholder: Implement AWS Price List API
-          reserved: 0,
-          spot: 0
-        },
-        category: this.determineInstanceCategory(instance),
-        lastUpdated: new Date()
-      }));
-
-      await Instance.deleteMany({ provider: 'aws' });
-      await Instance.insertMany(instances, { ordered: false });
-      logger.info(`Inserted ${instances.length} AWS instances`);
-      return instances;
-    } catch (error) {
-      logger.error('Error fetching AWS instances:', error.message);
-      throw error;
-    }
-  }
-
-  async fetchAzureInstances() {
-    if (!this.azureClient) {
-      logger.error('Azure client not initialized; cannot fetch instances');
-      throw new Error('Azure client not initialized');
-    }
-    try {
-      const vmSizes = await this.azureClient.virtualMachineSizes.list(
-        process.env.AZURE_LOCATION || 'eastus'
-      );
-
-      const instances = vmSizes.map(vm => ({
-        provider: 'azure',
-        instanceType: vm.name,
-        region: process.env.AZURE_LOCATION || 'eastus',
-        specs: {
-          vCPUs: vm.numberOfCores,
-          memory: vm.memoryInMB / 1024, // Convert to GB
-          storage: vm.osDiskSizeInMB / 1024, // Convert to GB
-          gpu: vm.gpuCount > 0,
-          gpuType: vm.gpuName || null,
-          gpuCount: vm.gpuCount || 0
-        },
-        pricing: {
-          onDemand: 0, // Placeholder: Implement Azure Retail Prices API
-          reserved: 0,
-          spot: 0
-        },
-        category: this.determineInstanceCategory(vm),
-        lastUpdated: new Date()
-      }));
-
-      await Instance.deleteMany({ provider: 'azure' });
-      await Instance.insertMany(instances, { ordered: false });
-      logger.info(`Inserted ${instances.length} Azure instances`);
-      return instances;
-    } catch (error) {
-      logger.error('Error fetching Azure instances:', error.message);
-      throw error;
-    }
-  }
-
-  async fetchGCPInstances() {
-    if (!this.gcpBillingClient) {
-      logger.error('GCP client not initialized; cannot fetch instances');
-      throw new Error('GCP client not initialized');
-    }
-    try {
-      const auth = new GoogleAuth({
-        scopes: ['https://www.googleapis.com/auth/cloud-billing']
-      });
-      const client = await auth.getClient();
-      const accessToken = await client.getAccessToken();
-
-      logger.info('Fetching GCP SKUs from Cloud Billing API');
-      const response = await axios.get(
-        `https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken.token}`
-          }
-        }
-      );
-
-      const skus = response.data.skus.filter(
-        sku => sku.category.resourceFamily === 'Compute' &&
-               sku.category.usageType === 'OnDemand' &&
-               sku.serviceRegions.includes(process.env.GCP_ZONE?.split('-')[0] || 'us-central1')
-      );
-
-      logger.info(`Found ${skus.length} GCP SKUs`);
-
-      if (skus.length === 0) {
-        logger.warn('No GCP SKUs found; inserting dummy instance');
-        const dummyInstance = [{
-          provider: 'gcp',
-          instanceType: 'e2-micro',
-          region: 'us-central1',
+      const params = {
+        ServiceCode: 'AmazonEC2',
+        Filters: [
+          { Type: 'TERM_MATCH', Field: 'instanceType', Value: 't3.micro' },
+          { Type: 'TERM_MATCH', Field: 'location', Value: 'US East (N. Virginia)' },
+          { Type: 'TERM_MATCH', Field: 'operatingSystem', Value: 'Linux' },
+          { Type: 'TERM_MATCH', Field: 'tenancy', Value: 'Shared' },
+          { Type: 'TERM_MATCH', Field: 'preInstalledSw', Value: 'NA' },
+        ],
+      };
+      const data = await this.awsClient.getProducts(params).promise();
+      const instances = data.PriceList.map(item => {
+        const priceItem = JSON.parse(item);
+        const pricePerHour = priceItem.terms.OnDemand[Object.keys(priceItem.terms.OnDemand)[0]]
+          .priceDimensions[Object.keys(priceItem.terms.OnDemand[Object.keys(priceItem.terms.OnDemand)[0]].priceDimensions)[0]]
+          .pricePerUnit.USD;
+        return {
+          provider: 'aws',
+          instanceType: priceItem.product.attributes.instanceType,
+          region: priceItem.product.attributes.location,
           specs: {
-            vCPUs: 2,
-            memory: 1,
+            vCPUs: parseInt(priceItem.product.attributes.vcpu) || 2,
+            memory: parseFloat(priceItem.product.attributes.memory) || 1,
             storage: 0,
-            gpu: false,
-            gpuType: null,
-            gpuCount: 0
+            gpu: priceItem.product.attributes.gpu ? true : false,
+            gpuType: priceItem.product.attributes.gpu || null,
+            gpuCount: priceItem.product.attributes.gpu ? parseInt(priceItem.product.attributes.gpu) : 0
           },
           pricing: {
-            onDemand: 0.01,
+            onDemand: parseFloat(pricePerHour),
             reserved: 0,
             spot: 0
           },
           category: 'general',
           lastUpdated: new Date()
-        }];
-        await Instance.deleteMany({ provider: 'gcp' });
-        await Instance.insertMany(dummyInstance, { ordered: false });
-        logger.info('Inserted 1 dummy GCP instance');
-        return dummyInstance;
-      }
-
-      const instances = skus.map(sku => ({
-        provider: 'gcp',
-        instanceType: sku.description.split(' ')[0], // Extract machine type
-        region: sku.serviceRegions[0] || 'us-central1',
-        specs: {
-          vCPUs: this.parseVCPUsFromDescription(sku.description),
-          memory: this.parseMemoryFromDescription(sku.description),
-          storage: 0,
-          gpu: sku.description.toLowerCase().includes('gpu'),
-          gpuType: sku.description.toLowerCase().includes('gpu') ? 'Unknown' : null,
-          gpuCount: sku.description.toLowerCase().includes('gpu') ? 1 : 0
-        },
-        pricing: {
-          onDemand: this.convertNanoToHourly(sku.pricingInfo[0].pricingExpression.tieredRates[0].unitPrice.nanos),
-          reserved: 0,
-          spot: 0
-        },
-        category: this.determineInstanceCategory({
-          vCPUs: this.parseVCPUsFromDescription(sku.description),
-          memory: this.parseMemoryFromDescription(sku.description),
-          gpuCount: sku.description.toLowerCase().includes('gpu') ? 1 : 0
-        }),
-        lastUpdated: new Date()
-      }));
-
-      await Instance.deleteMany({ provider: 'gcp' });
-      await Instance.insertMany(instances, { ordered: false });
-      logger.info(`Inserted ${instances.length} GCP instances`);
-      return instances;
+        };
+      });
+      logger.info(`Found ${instances.length} AWS instances`);
+      return instances.length > 0 ? instances : [this.getDummyAWSInstance()];
     } catch (error) {
-      logger.error('Error fetching GCP instances:', error.message);
-      logger.warn('Inserting dummy GCP instance due to error');
-      const dummyInstance = [{
-        provider: 'gcp',
-        instanceType: 'e2-micro',
-        region: 'us-central1',
+      logger.error('Failed to fetch AWS instances:', error.message);
+      return [this.getDummyAWSInstance()];
+    }
+  }
+
+  async fetchAzureInstances() {
+    if (!this.azureClient) {
+      logger.error('Azure client not initialized');
+      return [this.getDummyAzureInstance()];
+    }
+
+    try {
+      const query = {
+        type: 'Usage',
+        timeframe: 'TheLastMonth',
+        dataset: {
+          granularity: 'Daily',
+          aggregation: {
+            totalCost: { name: 'Cost', function: 'Sum' }
+          },
+          filter: {
+            dimensions: {
+              name: 'ServiceName',
+              operator: 'In',
+              values: ['Virtual Machines']
+            }
+          }
+        }
+      };
+      const result = await this.azureClient.query.usage(
+        `subscriptions/${process.env.AZURE_SUBSCRIPTION_ID}`,
+        query
+      );
+      const instances = result.rows.map(row => ({
+        provider: 'azure',
+        instanceType: row[0] || 'D2s v3',
+        region: process.env.AZURE_LOCATION,
         specs: {
           vCPUs: 2,
-          memory: 1,
+          memory: 8,
           storage: 0,
           gpu: false,
           gpuType: null,
           gpuCount: 0
         },
         pricing: {
-          onDemand: 0.01,
+          onDemand: row[1] || 0.096,
           reserved: 0,
           spot: 0
         },
         category: 'general',
         lastUpdated: new Date()
-      }];
-      await Instance.deleteMany({ provider: 'gcp' });
-      await Instance.insertMany(dummyInstance, { ordered: false });
-      logger.info('Inserted 1 dummy GCP instance');
-      return dummyInstance;
+      }));
+      logger.info(`Found ${instances.length} Azure instances`);
+      return instances.length > 0 ? instances : [this.getDummyAzureInstance()];
+    } catch (error) {
+      logger.error('Failed to fetch Azure instances:', error.message);
+      return [this.getDummyAzureInstance()];
     }
-  }
-
-  parseVCPUsFromDescription(description) {
-    const match = description.match(/(\d+)\s*vCPU/);
-    return match ? parseInt(match[1]) : 2; // Default to 2 if not found
-  }
-
-  parseMemoryFromDescription(description) {
-    const match = description.match(/(\d+\.?\d*)\s*GB/);
-    return match ? parseFloat(match[1]) : 4; // Default to 4GB if not found
-  }
-
-  convertNanoToHourly(nanos) {
-    return nanos / 1e9 / 730; // Convert nanos to hourly rate (730 hours/month)
-  }
-
-  determineInstanceCategory(instance) {
-    if (instance.gpu || instance.gpuCount > 0) return 'gpu';
-    if (instance.memory > 64) return 'memory';
-    if (instance.vCPUs > 16) return 'compute';
-    if (instance.storage > 1000) return 'storage';
-    return 'general';
   }
 }
 
