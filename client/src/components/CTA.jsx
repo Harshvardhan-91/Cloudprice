@@ -4,21 +4,21 @@ import { Link } from 'react-router-dom';
 
 function CTA() {
   return (
-    <section className="relative py-24 bg-gradient-to-r from-blue-600 via-cyan-500 to-purple-600 text-white overflow-hidden">
-      {/* Animated floating elements */}
+    <section className="relative py-24 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 text-white overflow-hidden">
+      {/* Animated floating elements with more subtle colors */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute -top-20 -left-20 w-96 h-96 bg-white/10 rounded-full blur-3xl"
+          className="absolute -top-20 -left-20 w-96 h-96 bg-white/5 rounded-full blur-3xl"
           animate={{ x: [0, 40, 0], y: [0, 30, 0] }}
           transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
         />
         <motion.div
-          className="absolute -bottom-20 -right-20 w-96 h-96 bg-white/10 rounded-full blur-3xl"
+          className="absolute -bottom-20 -right-20 w-96 h-96 bg-white/5 rounded-full blur-3xl"
           animate={{ x: [0, -40, 0], y: [0, -30, 0] }}
           transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
         />
         <motion.div
-          className="absolute top-1/4 right-1/4 w-64 h-64 bg-white/5 rounded-full blur-2xl"
+          className="absolute top-1/4 right-1/4 w-64 h-64 bg-white/3 rounded-full blur-2xl"
           animate={{ x: [0, 60, 0], y: [0, -40, 0] }}
           transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
         />
@@ -34,7 +34,7 @@ function CTA() {
           className="flex flex-col items-center"
         >
           <motion.div 
-            className="inline-flex items-center mb-6 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md text-sm font-medium"
+            className="inline-flex items-center mb-6 px-4 py-2 rounded-full bg-slate-600/50 backdrop-blur-md text-sm font-medium"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
@@ -73,14 +73,14 @@ function CTA() {
           >
             <Link 
               to="/features"
-              className="px-8 py-4 rounded-xl bg-white text-blue-600 font-semibold text-lg hover:bg-opacity-90 transition-all flex items-center shadow-lg hover:shadow-xl hover:-translate-y-1"
+              className="px-8 py-4 rounded-xl bg-slate-100 text-slate-800 font-semibold text-lg hover:bg-slate-200 transition-all flex items-center shadow-lg hover:shadow-xl hover:-translate-y-1"
             >
               Explore Now <ArrowRightCircle className='ml-2 h-5 w-5' />
             </Link>
             
             <Link 
               to="/pricing"
-              className="px-8 py-4 rounded-xl bg-blue-700/30 backdrop-blur-sm text-white font-semibold text-lg hover:bg-blue-700/40 transition-all flex items-center border border-white/20"
+              className="px-8 py-4 rounded-xl bg-slate-700 text-white font-semibold text-lg hover:bg-slate-600 transition-all flex items-center border border-slate-500"
             >
               View Pricing <TrendingUp className='ml-2 h-5 w-5' />
             </Link>
