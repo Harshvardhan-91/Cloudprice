@@ -18,3 +18,5 @@
 {"level":"error","message":"Failed to initialize Azure client:","timestamp":"2025-05-14T19:48:22.872Z"}
 {"level":"error","message":"Failed to initialize Azure client:","timestamp":"2025-05-14T19:48:54.842Z"}
 {"level":"error","message":"Failed to initialize Azure client:","timestamp":"2025-05-14T19:57:27.885Z"}
+{"level":"error","message":"Failed to fetch Azure instances: The operation is not permitted for namespace 'Microsoft.CostManagement'. List of permitted provider namespaces is 'Microsoft.Resources,Microsoft.Authorization,Microsoft.Insights,Microsoft.Web,Microsoft.Support,Microsoft.VisualStudio,Microsoft.NotificationHubs,Microsoft.Sql,Microsoft.Billing,Microsoft.DatabaseFleetManager,Microsoft.Education,Microsoft.Features,Microsoft.Subscription'.","timestamp":"2025-05-15T17:33:14.933Z"}
+{"level":"error","message":"Failed to fetch AWS instances: \"[object Object]\" is not valid JSON","timestamp":"2025-05-16T08:24:29.320Z"}

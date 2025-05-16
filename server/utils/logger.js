@@ -1,8 +1,20 @@
 const winston = require('winston');
 
+// Custom format to handle error objects properly
+const errorFormat = winston.format((info) => {
+  if (info.error instanceof Error) {
+    info.error = {
+      message: info.error.message,
+      stack: info.error.stack,
+    };
+  }
+  return info;
+});
+
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
+    errorFormat(),
     winston.format.timestamp(),
     winston.format.json()
   ),
@@ -23,4 +35,4 @@ const logger = winston.createLogger({
   ]
 });
 
-module.exports = logger; 
+module.exports = logger;

@@ -57,11 +57,13 @@ mongoose.connect(process.env.MONGODB_URI)
 // Routes
 const pricingRoutes = require('./routes/pricing');
 const comparisonRoutes = require('./routes/comparison');
-const providerRoutes = require('./routes/providers');
+const { providerRouter, instancesRouter } = require('./routes/providers');
 
+// Mount routes
 app.use('/api/v1/pricing', pricingRoutes);
 app.use('/api/v1/comparison', comparisonRoutes);
-app.use('/api/v1/providers', providerRoutes);
+app.use('/api/v1/providers', providerRouter);
+app.use('/api/v1/instances', instancesRouter);
 
 // Health check endpoint
 app.get('/api/v1/health', (req, res) => {
