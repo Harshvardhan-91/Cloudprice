@@ -1,5 +1,5 @@
 const { google } = require('googleapis');
-const AWS = require('aws-sdk');
+const {PricingClient,GetProductsCommand}= require('@aws-sdk/client-pricing');
 const { DefaultAzureCredential } = require('@azure/identity');
 const { CostManagementClient } = require('@azure/arm-costmanagement');
 const logger = require('../utils/logger');
@@ -32,7 +32,7 @@ class CloudProviderService {
       if (!awsConfig.accessKeyId || !awsConfig.secretAccessKey) {
         throw new Error('AWS credentials missing or invalid');
       }
-      this.awsClient = new AWS.Pricing(awsConfig);
+      this.awsClient = new PricingClient(awsConfig);
       logger.info('AWS client initialized successfully');
     } catch (error) {
       logger.warn('AWS credentials missing or invalid; AWS client not initialized');
@@ -185,7 +185,8 @@ class CloudProviderService {
         MaxResults: 100,
       };
 
-      const data = await this.awsClient.getProducts(params).promise();
+      const command = new GetProductsCommand(params);
+      const data = await this.awsClient.send(command);
       logger.info('AWS Pricing API response:', data);
 
       if (!data.PriceList || !Array.isArray(data.PriceList)) {
