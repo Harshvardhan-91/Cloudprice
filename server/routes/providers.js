@@ -108,6 +108,7 @@ providerRouter.get('/:provider/pricing-history', async (req, res) => {
 instancesRouter.get('/:provider', async (req, res) => {
   try {
     const { provider } = req.params;
+    const { refresh } = req.query;
 
     // Validate provider
     const validProviders = ['aws', 'gcp', 'azure'];
@@ -116,28 +117,56 @@ instancesRouter.get('/:provider', async (req, res) => {
         status: 'error',
         message: 'Invalid provider. Must be one of: aws, gcp, azure'
       });
+    }    let instances = [];
+    
+    // First try to get data from database
+    try {
+      instances = await Instance.find({ provider }).limit(100);
+      console.log(`Found ${instances.length} ${provider} instances in database`);
+    } catch (dbError) {
+      console.warn('Database error:', dbError);
+    }
+    
+    // If refresh is requested or no instances found in database, get from API
+    if (refresh === 'true' || instances.length === 0) {
+      console.log(`Fetching fresh data for ${provider} from API`);
+      
+      try {
+        if (provider === 'aws') {
+          instances = await cloudProviderService.fetchAWSInstances();
+        } else if (provider === 'gcp') {
+          instances = await cloudProviderService.fetchGCPInstances();
+        } else if (provider === 'azure') {
+          instances = await cloudProviderService.fetchAzureInstances();
+        }
+        
+        console.log(`Fetched ${instances.length} instances from ${provider} API`);
+
+        // Try to save to database if we have valid instances
+        try {
+          // Only save if we have actual instances (not dummy data)
+          const isDummyData = 
+            (provider === 'aws' && instances.length === 1 && instances[0].instanceType === 't2.micro') ||
+            (provider === 'gcp' && instances.length === 1 && instances[0].instanceType === 'e2-micro') ||
+            (provider === 'azure' && instances.length === 1 && instances[0].instanceType === 'D2s v3');
+            
+          if (instances.length > 0 && !isDummyData) {
+            // Clear existing data for this provider to remove any stale data
+            await Instance.deleteMany({ provider });
+            await Instance.insertMany(instances);
+            console.log(`Saved ${instances.length} ${provider} instances to database`);
+          }
+        } catch (saveError) {
+          console.warn('Failed to save instances to database:', saveError);
+        }
+      } catch (fetchError) {
+        console.error(`Error fetching ${provider} instances:`, fetchError);
+      }
     }
 
-    // Fetch fresh data from the provider's API
-    let instances;
-    if (provider === 'aws') {
-      instances = await cloudProviderService.fetchAWSInstances();
-    } else if (provider === 'gcp') {
-      instances = await cloudProviderService.fetchGCPInstances();
-    } else if (provider === 'azure') {
-      instances = await cloudProviderService.fetchAzureInstances();
-    }
-
-    // Clear existing data for this provider to remove any stale dummy data
-    await Instance.deleteMany({ provider });
-
-    // Save the new instances to the database
-    if (instances && instances.length > 0) {
-      await Instance.insertMany(instances);
-    }
-
-    // Fetch the saved instances from the database
-    const savedInstances = await Instance.find({ provider }).sort({ 'pricing.onDemand': 1 });
+    // Fetch the saved instances from the database - use a query parameter to limit results if too many
+    const limit = parseInt(req.query.limit) || 100;
+    const savedInstances = await Instance.find({ provider }).sort({ 'pricing.onDemand': 1 }).limit(limit);
 
     res.json({
       status: 'success',

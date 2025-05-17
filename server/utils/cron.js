@@ -2,7 +2,10 @@ const cron = require('node-cron');
 const logger = require('./logger');
 const cloudProviderService = require('../services/cloudProviderService');
 
+const Instance = require('../models/Instance');
+
 const schedulePriceUpdates = () => {
+  // Run every 3 days at midnight (0 0 */3 * *)
   cron.schedule('0 0 */3 * *', async () => {
     try {
       logger.info('Starting scheduled pricing update...');
@@ -11,7 +14,13 @@ const schedulePriceUpdates = () => {
       if (cloudProviderService.awsClient) {
         logger.info('Updating AWS instances...');
         const awsInstances = await cloudProviderService.fetchAWSInstances();
-        logger.info(`AWS instances updated successfully: ${awsInstances.length} records`);
+        
+        // Save to database
+        if (awsInstances && awsInstances.length > 0) {
+          await Instance.deleteMany({ provider: 'aws' });
+          await Instance.insertMany(awsInstances);
+          logger.info(`Saved ${awsInstances.length} AWS instances to the database`);
+        }
       } else {
         logger.warn('Skipping AWS update: AWS client not initialized');
       }
@@ -20,16 +29,28 @@ const schedulePriceUpdates = () => {
       if (cloudProviderService.azureClient) {
         logger.info('Updating Azure instances...');
         const azureInstances = await cloudProviderService.fetchAzureInstances();
-        logger.info(`Azure instances updated successfully: ${azureInstances.length} records`);
+        
+        // Save to database
+        if (azureInstances && azureInstances.length > 0) {
+          await Instance.deleteMany({ provider: 'azure' });
+          await Instance.insertMany(azureInstances);
+          logger.info(`Saved ${azureInstances.length} Azure instances to the database`);
+        }
       } else {
         logger.warn('Skipping Azure update: Azure client not initialized');
       }
 
       // Update GCP instances
-      if (cloudProviderService.gcpBillingClient) {
+      if (cloudProviderService.gcpClient) {
         logger.info('Updating GCP instances...');
         const gcpInstances = await cloudProviderService.fetchGCPInstances();
-        logger.info(`GCP instances updated successfully: ${gcpInstances.length} records`);
+        
+        // Save to database
+        if (gcpInstances && gcpInstances.length > 0) {
+          await Instance.deleteMany({ provider: 'gcp' });
+          await Instance.insertMany(gcpInstances);
+          logger.info(`Saved ${gcpInstances.length} GCP instances to the database`);
+        }
       } else {
         logger.warn('Skipping GCP update: GCP client not initialized');
       }

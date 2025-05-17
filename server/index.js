@@ -52,16 +52,21 @@ app.use(limiter);
 // Database connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => logger.info('Connected to MongoDB'))
-  .catch(err => logger.error('MongoDB connection error:', err));
+  .catch(err => {
+    logger.warn('MongoDB connection failed, continuing without database:', err);
+    logger.warn('The application will fetch pricing data directly from APIs');
+  });
 
 // Routes
 const pricingRoutes = require('./routes/pricing');
 const comparisonRoutes = require('./routes/comparison');
+const compareRoutes = require('./routes/compare');
 const { providerRouter, instancesRouter } = require('./routes/providers');
 
 // Mount routes
 app.use('/api/v1/pricing', pricingRoutes);
 app.use('/api/v1/comparison', comparisonRoutes);
+app.use('/api/v1/compare', compareRoutes);
 app.use('/api/v1/providers', providerRouter);
 app.use('/api/v1/instances', instancesRouter);
 
@@ -96,7 +101,7 @@ try {
 }
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
 });

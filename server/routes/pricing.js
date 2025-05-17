@@ -7,34 +7,33 @@ const logger = require('../utils/logger');
 router.get('/aws', async (req, res) => {
   try {
     logger.info('Fetching AWS instances');
-    let instances = await Instance.find({ provider: 'aws' }).limit(100);
-    logger.info(`Found ${instances.length} AWS instances`);
-    if (instances.length === 0) {
-      logger.warn('No AWS instances found; inserting dummy instance');
-      const dummyInstance = [{
-        provider: 'aws',
-        instanceType: 't2.micro',
-        region: 'us-east-1',
-        specs: {
-          vCPUs: 1,
-          memory: 1,
-          storage: 0,
-          gpu: false,
-          gpuType: null,
-          gpuCount: 0
-        },
-        pricing: {
-          onDemand: 0.0116,
-          reserved: 0,
-          spot: 0
-        },
-        category: 'general',
-        lastUpdated: new Date()
-      }];
-      await Instance.insertMany(dummyInstance, { ordered: false });
-      instances = dummyInstance;
-      logger.info('Inserted 1 dummy AWS instance');
+    const cloudProviderService = require('../services/cloudProviderService');
+    
+    // Try to get instances from database first
+    let instances = [];
+    try {
+      instances = await Instance.find({ provider: 'aws' }).limit(100);
+      logger.info(`Found ${instances.length} AWS instances in database`);
+    } catch (dbError) {
+      logger.warn('Database error, falling back to direct API fetch:', dbError);
     }
+    
+    // If database doesn't have instances, fetch directly from API
+    if (instances.length === 0) {
+      logger.info('No AWS instances found in database, fetching from API');
+      instances = await cloudProviderService.fetchAWSInstances();
+      
+      // Try to save to database for future use
+      try {
+        if (instances.length > 0 && instances[0].instanceType !== 't2.micro') {
+          await Instance.insertMany(instances, { ordered: false });
+          logger.info(`Saved ${instances.length} AWS instances to database`);
+        }
+      } catch (saveError) {
+        logger.warn('Failed to save instances to database:', saveError);
+      }
+    }
+    
     res.json({ status: 'success', data: instances });
   } catch (error) {
     logger.error('Error fetching AWS instances:', error);
@@ -46,34 +45,33 @@ router.get('/aws', async (req, res) => {
 router.get('/gcp', async (req, res) => {
   try {
     logger.info('Fetching GCP instances');
-    let instances = await Instance.find({ provider: 'gcp' }).limit(100);
-    logger.info(`Found ${instances.length} GCP instances`);
-    if (instances.length === 0) {
-      logger.warn('No GCP instances found; inserting dummy instance');
-      const dummyInstance = [{
-        provider: 'gcp',
-        instanceType: 'e2-micro',
-        region: 'us-central1',
-        specs: {
-          vCPUs: 2,
-          memory: 1,
-          storage: 0,
-          gpu: false,
-          gpuType: null,
-          gpuCount: 0
-        },
-        pricing: {
-          onDemand: 0.01,
-          reserved: 0,
-          spot: 0
-        },
-        category: 'general',
-        lastUpdated: new Date()
-      }];
-      await Instance.insertMany(dummyInstance, { ordered: false });
-      instances = dummyInstance;
-      logger.info('Inserted 1 dummy GCP instance');
+    const cloudProviderService = require('../services/cloudProviderService');
+    
+    // Try to get instances from database first
+    let instances = [];
+    try {
+      instances = await Instance.find({ provider: 'gcp' }).limit(100);
+      logger.info(`Found ${instances.length} GCP instances in database`);
+    } catch (dbError) {
+      logger.warn('Database error, falling back to direct API fetch:', dbError);
     }
+    
+    // If database doesn't have instances, fetch directly from API
+    if (instances.length === 0) {
+      logger.info('No GCP instances found in database, fetching from API');
+      instances = await cloudProviderService.fetchGCPInstances();
+      
+      // Try to save to database for future use
+      try {
+        if (instances.length > 0 && instances[0].instanceType !== 'e2-micro') {
+          await Instance.insertMany(instances, { ordered: false });
+          logger.info(`Saved ${instances.length} GCP instances to database`);
+        }
+      } catch (saveError) {
+        logger.warn('Failed to save instances to database:', saveError);
+      }
+    }
+    
     res.json({ status: 'success', data: instances });
   } catch (error) {
     logger.error('Error fetching GCP instances:', error);
@@ -85,34 +83,33 @@ router.get('/gcp', async (req, res) => {
 router.get('/azure', async (req, res) => {
   try {
     logger.info('Fetching Azure instances');
-    let instances = await Instance.find({ provider: 'azure' }).limit(100);
-    logger.info(`Found ${instances.length} Azure instances`);
-    if (instances.length === 0) {
-      logger.warn('No Azure instances found; inserting dummy instance');
-      const dummyInstance = [{
-        provider: 'azure',
-        instanceType: 'D2s_v3',
-        region: 'eastus',
-        specs: {
-          vCPUs: 2,
-          memory: 8,
-          storage: 0,
-          gpu: false,
-          gpuType: null,
-          gpuCount: 0
-        },
-        pricing: {
-          onDemand: 0.096,
-          reserved: 0,
-          spot: 0
-        },
-        category: 'general',
-        lastUpdated: new Date()
-      }];
-      await Instance.insertMany(dummyInstance, { ordered: false });
-      instances = dummyInstance;
-      logger.info('Inserted 1 dummy Azure instance');
+    const cloudProviderService = require('../services/cloudProviderService');
+    
+    // Try to get instances from database first
+    let instances = [];
+    try {
+      instances = await Instance.find({ provider: 'azure' }).limit(100);
+      logger.info(`Found ${instances.length} Azure instances in database`);
+    } catch (dbError) {
+      logger.warn('Database error, falling back to direct API fetch:', dbError);
     }
+    
+    // If database doesn't have instances, fetch directly from API
+    if (instances.length === 0) {
+      logger.info('No Azure instances found in database, fetching from API');
+      instances = await cloudProviderService.fetchAzureInstances();
+      
+      // Try to save to database for future use
+      try {
+        if (instances.length > 0 && instances[0].instanceType !== 'D2s_v3') {
+          await Instance.insertMany(instances, { ordered: false });
+          logger.info(`Saved ${instances.length} Azure instances to database`);
+        }
+      } catch (saveError) {
+        logger.warn('Failed to save instances to database:', saveError);
+      }
+    }
+    
     res.json({ status: 'success', data: instances });
   } catch (error) {
     logger.error('Error fetching Azure instances:', error);

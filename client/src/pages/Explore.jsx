@@ -17,12 +17,14 @@ import {
   Globe,
   DollarSign,
   Layers,
-  Activity
+  Activity,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import PriceFilters from '../components/PriceFilters';
 import PriceTable from '../components/PriceTable';
 import PriceChart from '../components/PriceChart';
-import { fetchInstances } from '../api';
+import { fetchInstances, compareInstances } from '../api';
 
 const PROVIDERS = [
   { id: 'aws', name: 'AWS', color: '#FF9900', gradient: 'from-amber-400 to-orange-500' },
@@ -54,40 +56,75 @@ function Explore() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('price');
   const [sortOrder, setSortOrder] = useState('asc');
-  const [provider, setProvider] = useState('gcp');
+  const [selectedProviders, setSelectedProviders] = useState(['aws', 'azure', 'gcp']);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
-    providers: [],
+    providers: ['aws', 'azure', 'gcp'],
     regions: [],
     vCPUs: [1, 16],
     ram: [1, 64],
     gpu: false,
     instanceTypes: [],
   });
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const toggleFilter = () => setIsFilterOpen(!isFilterOpen);
 
-  const fetchData = async () => {
+  const fetchData = async (forceRefresh = false) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetchInstances(provider);
+      // Use the enhanced compareInstances API for better filtering
+      const filterParams = {
+        providers: selectedProviders.join(','),
+        minCpu: filters.vCPUs[0],
+        maxCpu: filters.vCPUs[1],
+        minMemory: filters.ram[0],
+        maxMemory: filters.ram[1],
+        gpu: filters.gpu,
+        sortBy: sortBy === 'price' ? 'pricing.onDemand' : 
+                sortBy === 'costPerCore' ? 'costPerVCPU' :
+                sortBy === 'costPerGB' ? 'costPerGB' : sortBy,
+        sortOrder,
+        page,
+        searchTerm: searchQuery
+      };
+      
+      if (filters.regions.length > 0) {
+        filterParams.region = filters.regions[0]; // Use first selected region
+      }
+      
+      const res = await compareInstances(filterParams);
+      
       const transformedData = (res.data || []).map(item => ({
+        id: item._id,
         provider: item.provider.toUpperCase(),
         region: item.region,
         vCPUs: item.specs.vCPUs,
         ram: item.specs.memory,
         price: item.pricing.onDemand,
-        costPerCore: item.pricing.onDemand / item.specs.vCPUs,
-        costPerGB: item.pricing.onDemand / item.specs.memory,
+        costPerCore: item.costPerVCPU || item.pricing.onDemand / item.specs.vCPUs,
+        costPerGB: item.costPerGB || item.pricing.onDemand / item.specs.memory,
         instanceType: item.instanceType,
         specs: item.specs,
+        gpu: item.specs.gpu,
+        gpuType: item.specs.gpuType,
+        reserved: item.pricing.reserved,
+        spot: item.pricing.spot,
+        category: item.category
       }));
+      
       setData(transformedData);
+      
+      if (res.pagination) {
+        setTotalPages(res.pagination.pages);
+      }
+      
       if (res.data.length === 0) {
-        setError(`No instances found for ${provider.toUpperCase()}.`);
+        setError(`No instances found matching the current filters.`);
       }
     } catch (err) {
       setError(err.message);
@@ -98,25 +135,16 @@ function Explore() {
 
   useEffect(() => {
     fetchData();
-  }, [provider]);
-
-  // Apply filters and search
-  const filteredData = data.filter(item => {
-    const matchesProvider = filters.providers.length === 0 || filters.providers.includes(item.provider.toLowerCase());
-    const matchesRegion = filters.regions.length === 0 || filters.regions.includes(item.region);
-    const matchesVCPUs = item.vCPUs >= filters.vCPUs[0] && item.vCPUs <= filters.vCPUs[1];
-    const matchesRam = item.ram >= filters.ram[0] && item.ram <= filters.ram[1];
-    const matchesGpu = !filters.gpu || item.specs.gpu;
-    const matchesInstanceType = filters.instanceTypes.length === 0 || filters.instanceTypes.some(type => item.instanceType.includes(type));
-    const matchesSearch = searchQuery === '' || 
-      item.instanceType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.region.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesProvider && matchesRegion && matchesVCPUs && matchesRam && matchesGpu && matchesInstanceType && matchesSearch;
-  });
+  }, [selectedProviders, filters, sortBy, sortOrder, page, searchQuery]);
+  
+  // Handle provider selection change
+  const handleProviderChange = (providers) => {
+    setSelectedProviders(providers);
+    setPage(1); // Reset to first page
+  };
 
   // Apply sorting
-  const sortedData = [...filteredData].sort((a, b) => {
+  const sortedData = [...data].sort((a, b) => {
     const aValue = a[sortBy] || 0;
     const bValue = b[sortBy] || 0;
     if (sortOrder === 'asc') {
@@ -125,7 +153,8 @@ function Explore() {
     return aValue < bValue ? 1 : -1;
   });
   
-  const currentProvider = PROVIDERS.find(p => p.id === provider) || PROVIDERS[0];
+  const currentProvider = selectedProviders.length === 1 ? 
+    PROVIDERS.find(p => p.id === selectedProviders[0]) : PROVIDERS[0];
 
   // Get key stats
   const getStats = () => {
@@ -141,73 +170,46 @@ function Explore() {
   
   const stats = getStats();
 
+  // Handle pagination
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+  
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  };
+
   return (
     <section className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-slate-100">
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-64 overflow-hidden -z-10">
-        <div className={`absolute inset-0 bg-gradient-to-r ${currentProvider.gradient} opacity-5`}></div>
+        <div className={`absolute inset-0 bg-gradient-to-r ${currentProvider?.gradient || 'from-blue-400 to-indigo-500'} opacity-5`}></div>
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-600"></div>
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Header with Cloud Animation */}
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           className="mb-8 text-center relative"
         >
-          <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 opacity-20 w-full">
-            <motion.div 
-              className="flex justify-center"
-              animate={{ x: [10, -10, 10] }}
-              transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
-            >
-              {[...Array(5)].map((_, i) => (
-                <motion.div 
-                  key={i}
-                  className="cloud-shape bg-blue-100 mx-2"
-                  animate={{ 
-                    y: [0, i % 2 ? -10 : 10, 0],
-                    scale: [1, i % 2 ? 1.05 : 0.95, 1]
-                  }}
-                  transition={{ repeat: Infinity, duration: 5 + i, ease: "easeInOut" }}
-                  style={{ 
-                    width: 100 + Math.random() * 50,
-                    height: 40 + Math.random() * 20,
-                    borderRadius: '50%' 
-                  }}
-                />
-              ))}
-            </motion.div>
-          </div>
-
           <div className="relative z-10">
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5, type: "spring" }}
-              className="inline-flex items-center justify-center mb-3"
-            >
-              <div className={`p-3 rounded-2xl bg-gradient-to-br ${currentProvider.gradient} text-white shadow-lg mr-4`}>
-                <CloudLightning className="h-8 w-8" />
-              </div>
-              <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900">
-                Cloud <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Explorer</span>
-              </h1>
-            </motion.div>
-            <motion.p 
-              className="text-lg text-slate-600 max-w-2xl mx-auto"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.7 }}
-            >
-              Find the perfect VM instance across major cloud providers with real-time pricing insights.
-            </motion.p>
+            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900">
+              Cloud <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">VM Price Comparison</span>
+            </h1>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto mt-2">
+              Compare VM pricing across AWS, Azure, and GCP to find the perfect instance for your workload
+            </p>
           </div>
         </motion.div>
 
-        {/* Provider Selector - Enhanced */}
+        {/* Provider Selector */}
         <motion.div 
           className="mb-8 flex justify-center"
           initial={{ opacity: 0, y: 20 }}
@@ -218,25 +220,37 @@ function Explore() {
             {PROVIDERS.map(p => (
               <motion.button
                 key={p.id}
-                onClick={() => setProvider(p.id)}
+                onClick={() => handleProviderChange([p.id])}
                 className={`px-6 py-3.5 flex items-center justify-center rounded-xl transition-all duration-300 ${
-                  provider === p.id 
+                  selectedProviders.length === 1 && selectedProviders[0] === p.id
                     ? `bg-gradient-to-r ${p.gradient} text-white font-medium shadow-lg` 
                     : 'bg-white text-slate-700 hover:bg-slate-50'
                 }`}
-                whileHover={{ scale: provider !== p.id ? 1.02 : 1 }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <span className="mr-2.5" style={{ color: provider === p.id ? 'white' : p.color }}>
+                <span className="mr-2.5" style={{ color: (selectedProviders.length === 1 && selectedProviders[0] === p.id) ? 'white' : p.color }}>
                   {providerLogos[p.id]}
                 </span>
                 <span className="font-medium">{p.name}</span>
               </motion.button>
             ))}
+            <motion.button
+              onClick={() => handleProviderChange(['aws', 'azure', 'gcp'])}
+              className={`px-6 py-3.5 flex items-center justify-center rounded-xl transition-all duration-300 ${
+                selectedProviders.length === 3
+                  ? `bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium shadow-lg` 
+                  : 'bg-white text-slate-700 hover:bg-slate-50'
+              }`}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span className="font-medium">All Clouds</span>
+            </motion.button>
           </div>
         </motion.div>
 
-        {/* Stats Cards - New! */}
+        {/* Stats Cards */}
         {!loading && !error && stats && (
           <motion.div 
             className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
@@ -274,7 +288,7 @@ function Explore() {
                 <h3 className="text-slate-500 font-medium">Instances</h3>
               </div>
               <p className="text-2xl font-bold text-slate-800">
-                {sortedData.length} <span className="text-sm font-normal text-slate-500">of {data.length}</span>
+                {stats.totalInstances}
               </p>
             </div>
             
@@ -380,7 +394,7 @@ function Explore() {
           )}
         </AnimatePresence>
 
-        {/* View Toggle - Enhanced */}
+        {/* View Toggle */}
         <motion.div 
           className="flex justify-center mb-6"
           initial={{ opacity: 0, y: -10 }}
@@ -436,8 +450,8 @@ function Explore() {
                   </svg>
                 </div>
                 <div className="text-center">
-                  <p className="text-xl font-medium">Loading {provider.toUpperCase()} instances...</p>
-                  <p className="text-slate-400 mt-2">Fetching the latest pricing data from all regions</p>
+                  <p className="text-xl font-medium">Loading cloud instances...</p>
+                  <p className="text-slate-400 mt-2">Fetching the latest pricing data from selected providers</p>
                 </div>
               </div>
             ) : error ? (
@@ -449,7 +463,7 @@ function Explore() {
                   <p className="text-xl font-medium text-orange-600">{error}</p>
                   <p className="text-slate-500 mt-2 mb-6">Unable to fetch the requested data</p>
                   <motion.button
-                    onClick={fetchData}
+                    onClick={() => fetchData(true)}
                     className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center gap-2"
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
@@ -480,8 +494,39 @@ function Explore() {
             )}
           </motion.div>
         </AnimatePresence>
+        
+        {/* Pagination */}
+        {!loading && !error && totalPages > 1 && (
+          <div className="flex justify-center mt-6">
+            <div className="inline-flex rounded-xl overflow-hidden border border-slate-200 bg-white shadow">
+              <button 
+                onClick={handlePreviousPage}
+                disabled={page === 1}
+                className={`px-4 py-2 flex items-center gap-1 ${
+                  page === 1 ? 'text-slate-400' : 'text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span>Previous</span>
+              </button>
+              <div className="px-4 py-2 border-x border-slate-200 flex items-center">
+                <span className="text-slate-800 font-medium">Page {page} of {totalPages}</span>
+              </div>
+              <button 
+                onClick={handleNextPage}
+                disabled={page === totalPages}
+                className={`px-4 py-2 flex items-center gap-1 ${
+                  page === totalPages ? 'text-slate-400' : 'text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <span>Next</span>
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
-        {/* Provider Info Cards - New! */}
+        {/* Provider Info Cards */}
         <motion.div 
           className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6"
           initial={{ opacity: 0, y: 20 }}
@@ -525,25 +570,16 @@ function Explore() {
           </div>
         </motion.div>
         
-        {/* Footer - New! */}
+        {/* Footer */}
         <motion.div 
           className="mt-10 pt-8 border-t border-slate-200 text-center text-slate-500 text-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.6 }}
         >
-          <p>Cloud VM Price Comparison Tool — Pricing data updated regularly</p>
+          <p>Cloud VM Price Comparison Tool — Pricing data updated every 3 days</p>
         </motion.div>
       </div>
-      
-      {/* Global Styles */}
-      <style jsx>{`
-        .cloud-shape {
-          border-radius: 50%;
-          filter: blur(10px);
-          transform-origin: center center;
-        }
-      `}</style>
     </section>
   );
 }

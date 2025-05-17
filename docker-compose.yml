@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # MongoDB service
+  mongo:
+    image: mongo:latest
+    container_name: cloudprice-mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-example}
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - cloudprice-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  # Backend API service
+  server:
+    build: ./server
+    container_name: cloudprice-server
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MONGODB_URI=mongodb://root:example@mongo:27017/cloudprice?authSource=admin
+      - AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID}
+      - GOOGLE_APPLICATION_CREDENTIALS=credentials/gcp-credentials.json
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX_REQUESTS=100
+    volumes:
+      - ./server:/app
+      - ./server/node_modules:/app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+    networks:
+      - cloudprice-network
+    command: >
+      sh -c "npm start"
+
+  # Frontend client service
+  client:
+    build: ./client
+    container_name: cloudprice-client
+    restart: always
+    environment:
+      - VITE_API_BASE_URL=/api/v1
+    volumes:
+      - ./client:/app
+      - ./client/node_modules:/app/node_modules
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - cloudprice-network
+
+networks:
+  cloudprice-network:
+    driver: bridge
+
+volumes:
+  mongo-data:

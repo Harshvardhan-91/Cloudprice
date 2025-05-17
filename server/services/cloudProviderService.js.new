@@ -129,42 +129,26 @@ class CloudProviderService {
       // or alternatively use a more reliable approach with the public pricing API
 
       // For this implementation, we'll use the public pricing JSON data
-      // which is more reliable than direct API calls that require extensive permissions      // The original GCP pricing URL may sometimes return HTML instead of JSON
-      // We'll use a more reliable backup source for GCP pricing data
+      // which is more reliable than direct API calls that require extensive permissions
       const gcpPricingUrl = 'https://cloudpricingcalculator.appspot.com/static/data/pricelist.json';
+      const response = await fetch(gcpPricingUrl);
       
-      try {
-        const response = await fetch(gcpPricingUrl);
-        
-        if (!response.ok) {
-          logger.warn(`GCP pricing API returned ${response.status}: ${response.statusText}`);
-          throw new Error('GCP pricing API error');
-        }
-        
-        const responseText = await response.text();
-        let pricingData;
-          try {
-          // Try to parse the response as JSON
-          pricingData = JSON.parse(responseText);
-        } catch (parseError) {
-          logger.warn('Failed to parse GCP pricing data as JSON, returning dummy data');
-          return [this.getDummyGCPInstance()];
-        }
-        
-        logger.info('GCP pricing data fetched successfully');
+      if (!response.ok) {
+        throw new Error(`GCP pricing API returned ${response.status}: ${response.statusText}`);
+      }
+      
+      const pricingData = await response.json();
+      logger.info('GCP pricing data fetched successfully');
       
       if (!pricingData || !pricingData.gcp_price_list || !pricingData.gcp_price_list['CP-COMPUTEENGINE-VMIMAGE-N1-STANDARD']) {
         logger.warn('Invalid GCP pricing data structure');
         return [this.getDummyGCPInstance()];
       }
-        // Map instance types and pricing
+      
+      // Map instance types and pricing
       const standardVMs = pricingData.gcp_price_list['CP-COMPUTEENGINE-VMIMAGE-N1-STANDARD'];
       const e2VMs = pricingData.gcp_price_list['CP-COMPUTEENGINE-VMIMAGE-E2-STANDARD'] || {};
       const n2VMs = pricingData.gcp_price_list['CP-COMPUTEENGINE-VMIMAGE-N2-STANDARD'] || {};
-      } catch (error) {
-        logger.error('Error processing GCP pricing data:', error);
-        return [this.getDummyGCPInstance()];
-      }
       
       // Merge different instance types
       const instances = [];
