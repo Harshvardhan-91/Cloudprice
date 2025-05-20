@@ -9,18 +9,22 @@ const CLOUDPRICE_API_ENDPOINT = process.env.CLOUDPRICE_API_ENDPOINT;
 // Helper function to fetch instances for a provider
 const fetchInstancesForProvider = async (provider, queryParams) => {
   try {
-    const providerPaths = {
-      'aws': 'aws/ec2/instances',
-      'gcp': 'gcp/compute/instances',
-      'azure': 'azure/regions'
-    };
-    
-    const providerPath = providerPaths[provider] || provider;
-    const query = new URLSearchParams(queryParams).toString();
-    const url = query ? `${CLOUDPRICE_API_ENDPOINT}/api/v2/${providerPath}?${query}` : `${CLOUDPRICE_API_ENDPOINT}/api/v2/${providerPath}`;
-    
+    let url;
+    if (provider === 'azure') {
+      // Use the v1 endpoint for Azure to fetch average prices per region
+      url = `${CLOUDPRICE_API_ENDPOINT}/api/v1/region_prices`;
+    } else {
+      const providerPaths = {
+        'aws': 'aws/ec2/instances',
+        'gcp': 'gcp/compute/instances',
+      };
+      const providerPath = providerPaths[provider] || provider;
+      const query = new URLSearchParams(queryParams).toString();
+      url = query ? `${CLOUDPRICE_API_ENDPOINT}/api/v2/${providerPath}?${query}` : `${CLOUDPRICE_API_ENDPOINT}/api/v2/${providerPath}`;
+    }
+
     logger.info(`Fetching data for ${provider} from URL: ${url}`);
-    
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -40,14 +44,24 @@ const fetchInstancesForProvider = async (provider, queryParams) => {
     logger.info(`Raw response for ${provider} (first 1000 chars): ${responseString}`);
 
     let instances = [];
-    
+
     if (provider === 'azure') {
-      logger.info(`Does data.Data exist and is it an array? ${data.Data && Array.isArray(data.Data)}`);
-      if (data.Data && Array.isArray(data.Data)) {
-        logger.warn(`Azure endpoint only provides region names, no instance or pricing data available. Skipping Azure data.`);
-        return [];
+      // Expecting data to have a PricesPerRegion array
+      if (data && Array.isArray(data.PricesPerRegion)) {
+        logger.info(`Found PricesPerRegion array for Azure`);
+        instances = data.PricesPerRegion.map(item => ({
+          id: uuidv4(),
+          provider: provider,
+          Region: item.regionId || 'unknown', // Use regionId as the region
+          PricePerHour: item.averagePrice || 0, // Use averagePrice as the price
+          InstanceType: 'N/A', // Placeholder since we don't have instance data
+          ProcessorVCPUCount: 0, // Placeholder
+          MemorySizeInMB: 0, // Placeholder
+          GPUCount: 0, // Placeholder
+          InstanceFamily: 'General', // Placeholder
+        }));
       } else {
-        logger.error(`Unexpected response format for ${provider}: No valid region array found`);
+        logger.warn(`Unexpected response format for ${provider}: Expected an object with PricesPerRegion array`);
         return [];
       }
     } else {
@@ -72,9 +86,10 @@ const fetchInstancesForProvider = async (provider, queryParams) => {
       }
     }
 
+    logger.info(`Total instances fetched for ${provider}: ${instances.length}`);
     return instances;
   } catch (error) {
-    logger.error(`Error fetching data for ${provider}:`, error);
+    logger.error(`Error fetching data for ${provider}: ${error.message}`, error);
     return [];
   }
 };
@@ -103,9 +118,9 @@ router.get('/', async (req, res) => {
     // Apply search filter
     if (searchTerm) {
       combinedInstances = combinedInstances.filter(item =>
-        item.InstanceType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.Region?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.provider?.toLowerCase().includes(searchTerm.toLowerCase())
+        (item.InstanceType || 'N/A').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.Region || 'unknown').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.provider || 'unknown').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -122,7 +137,7 @@ router.get('/', async (req, res) => {
         const vCPUs = item.ProcessorVCPUCount || item.vCPUs || 0;
         const ram = (item.MemorySizeInMB || item.ram || 0) / 1024;
         const hasGpu = (item.GPUCount || item.GPU || 0) > 0;
-        const matchesRegion = region ? item.Region === region : true;
+        const matchesRegion = region ? (item.Region || 'unknown') === region : true;
 
         return (
           vCPUs >= minVCPUs &&
@@ -135,14 +150,6 @@ router.get('/', async (req, res) => {
       });
     }
 
-    if (combinedInstances.length === 0) {
-      logger.warn('No data fetched from any provider');
-      return res.status(200).json({
-        data: [],
-        pagination: { pages: 1 }
-      });
-    }
-
     const transformedData = combinedInstances.map(item => {
       const provider = item.provider ? item.provider.toLowerCase() : 'unknown';
       const vCPUs = item.ProcessorVCPUCount || item.vCPUs || 0;
@@ -152,7 +159,7 @@ router.get('/', async (req, res) => {
       return {
         id: item.id || uuidv4(),
         provider: provider,
-        instanceType: item.InstanceType || 'unknown',
+        instanceType: item.InstanceType || 'N/A',
         region: item.Region || 'unknown',
         vCPUs: vCPUs,
         ram: ram / 1024,

@@ -81,8 +81,8 @@ function Explore() {
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     regions: [],
-    vCPUs: [1, 16],
-    ram: [1, 64],
+    vCPUs: [0, 16], // Changed min from 1 to 0 to include Azure data
+    ram: [0, 64],   // Changed min from 1 to 0 to include Azure data
     gpu: false,
     instanceTypes: [],
   });
@@ -118,7 +118,9 @@ function Explore() {
         filterParams.region = filters.regions[0];
       }
 
+      console.log("Fetching data with params:", filterParams);
       const res = await compareInstances(filterParams);
+      console.log("API response:", res);
 
       const transformedData = (res.data || []).map((item) => ({
         id: item.id,
@@ -145,6 +147,7 @@ function Explore() {
         setError(`No instances found matching the current filters.`);
       }
     } catch (err) {
+      console.error("Error in fetchData:", err);
       setError(`Unable to fetch the requested data: ${err.message}`);
       setData([]);
     } finally {
@@ -188,6 +191,13 @@ function Explore() {
   };
 
   const stats = getStats();
+
+  // Check if Azure data lacks instance details
+  const hasAzureDataWithoutInstances =
+    selectedProviders.includes("azure") &&
+    sortedData.some(
+      (item) => item.provider === "AZURE" && item.instanceType === "N/A"
+    );
 
   const handlePreviousPage = () => {
     if (page > 1) {
@@ -321,8 +331,7 @@ function Explore() {
                 </div>
                 <h3 className="text-slate-500 font-medium">Instances</h3>
               </div>
-              <p className="text-2xl font-bol
-d text-slate-800">
+              <p className="text-2xl font-bold text-slate-800">
                 {stats.totalInstances}
               </p>
             </div>
@@ -338,6 +347,19 @@ d text-slate-800">
                 {new Date().toLocaleDateString()}
               </p>
             </div>
+          </motion.div>
+        )}
+
+        {hasAzureDataWithoutInstances && !loading && !error && (
+          <motion.div
+            className="mb-6 text-center text-sm text-orange-600 bg-orange-50 p-4 rounded-xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <p>
+              Note: Azure data currently shows average prices per region. Instance-specific details are not available.
+            </p>
           </motion.div>
         )}
 
@@ -626,7 +648,7 @@ d text-slate-800">
               <div className="p-2 rounded-lg bg-purple-50 text-purple-500 mr-3">
                 <MemoryStick className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-800">
+              <h3 className="text-lg font-semibold text text-slate-800">
                 Memory Optimized
               </h3>
             </div>
