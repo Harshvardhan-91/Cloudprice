@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Filter, X, Sliders, Cpu, HardDrive, Globe, Zap } from 'lucide-react';
+import { Filter, X, Sliders, Cpu, HardDrive, Globe, Zap, Database } from 'lucide-react';
 
 function PriceFilters({ filters, setFilters, selectedProviders, setSelectedProviders }) {
   const providers = [
@@ -64,6 +64,7 @@ function PriceFilters({ filters, setFilters, selectedProviders, setSelectedProvi
       ram: [0, 64],
       gpu: false,
       instanceTypes: [],
+      includeRDS: false,
     });
     setSelectedProviders(['aws', 'azure', 'gcp']);
   };
@@ -258,6 +259,28 @@ function PriceFilters({ filters, setFilters, selectedProviders, setSelectedProvi
             </span>
           </label>
         </div>
+
+        {/* RDS Toggle (AWS-specific) */}
+        {selectedProviders.includes('aws') && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-gray-700">
+              <Database className="h-5 w-5" />
+              <h3 className="font-medium">Include RDS Instances</h3>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={filters.includeRDS}
+                onChange={(e) => setFilters(prev => ({ ...prev, includeRDS: e.target.checked }))}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <span className="ml-3 text-sm text-gray-600">
+                {filters.includeRDS ? 'Include RDS Instances' : 'Exclude RDS Instances'}
+              </span>
+            </label>
+          </div>
+        )}
       </div>
     </motion.div>
   );

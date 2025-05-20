@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const logger = require('../utils/logger');
 const { v4: uuidv4 } = require('uuid');
-const cors = require('cors'); // Add CORS middleware
+const cors = require('cors');
 
 // Read allowed origins from environment variable (comma-separated list)
 if (!process.env.FRONTEND_URL) {
@@ -13,27 +13,33 @@ const ALLOWED_ORIGINS = process.env.FRONTEND_URL.split(',');
 // Configure CORS to dynamically allow origins
 router.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin || ALLOWED_ORIGINS.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error(`CORS policy: Origin ${origin} is not allowed. Allowed origins: ${ALLOWED_ORIGINS.join(', ')}`));
     }
   },
-  methods: ['GET', 'POST', 'OPTIONS'], // Allow these HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
-  credentials: true, // If you need to send cookies or auth headers
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }));
 
 const CLOUDPRICE_API_KEY = process.env.CLOUDPRICE_API_KEY;
 const CLOUDPRICE_API_ENDPOINT = process.env.CLOUDPRICE_API_ENDPOINT;
+
+// Simulated exchange rates (hardcoded for simplicity)
+const EXCHANGE_RATES = {
+  USD: 1,
+  EUR: 0.85,
+  GBP: 0.73,
+  INR: 83.0,
+};
 
 // Helper function to fetch instances for a provider
 const fetchInstancesForProvider = async (provider, queryParams) => {
   try {
     let url;
     if (provider === 'azure') {
-      // Use the v1 endpoint for Azure to fetch average prices per region
       url = `${CLOUDPRICE_API_ENDPOINT}/api/v1/region_prices`;
     } else {
       const providerPaths = {
@@ -68,7 +74,6 @@ const fetchInstancesForProvider = async (provider, queryParams) => {
     let instances = [];
 
     if (provider === 'azure') {
-      // Expecting data to have a PricesPerRegion array
       if (data && Array.isArray(data.PricesPerRegion)) {
         logger.info(`Found PricesPerRegion array for Azure`);
         instances = data.PricesPerRegion.map(item => ({
@@ -81,7 +86,7 @@ const fetchInstancesForProvider = async (provider, queryParams) => {
           MemorySizeInMB: 0,
           GPUCount: 0,
           InstanceFamily: 'General',
-          isRegionBased: true, // Flag to indicate this is a region-based average
+          isRegionBased: true,
         }));
       } else {
         logger.warn(`Unexpected response format for ${provider}: Expected an object with PricesPerRegion array`);
@@ -111,12 +116,60 @@ const fetchInstancesForProvider = async (provider, queryParams) => {
       }
     }
 
+    // Simulate RDS instances for AWS (placeholder)
+    if (provider === 'aws') {
+      const rdsInstances = instances.slice(0, 2).map((item, index) => ({
+        ...item,
+        id: uuidv4(),
+        InstanceType: `db.${item.InstanceType || 't3.micro'}`,
+        InstanceFamily: 'RDS',
+        PricePerHour: (item.PricePerHour || 0) * 1.2, // Simulate higher price for RDS
+      }));
+      instances = [...instances, ...rdsInstances];
+    }
+
     logger.info(`Total instances fetched for ${provider}: ${instances.length}`);
     return instances;
   } catch (error) {
     logger.error(`Error fetching data for ${provider}: ${error.message}`, error);
     return [];
   }
+};
+
+// Aggregate region pricing for AWS and GCP
+const aggregateRegionPricing = (instances) => {
+  const regionMap = {};
+
+  instances.forEach(item => {
+    if (item.isRegionBased) return; // Skip Azure, already region-based
+
+    const region = item.Region || 'unknown';
+    if (!regionMap[region]) {
+      regionMap[region] = {
+        provider: item.provider,
+        Region: region,
+        totalPrice: 0,
+        count: 0,
+        averagePrice: 0,
+      };
+    }
+    regionMap[region].totalPrice += item.PricePerHour || 0;
+    regionMap[region].count += 1;
+    regionMap[region].averagePrice = regionMap[region].totalPrice / regionMap[region].count;
+  });
+
+  return Object.values(regionMap).map(item => ({
+    id: uuidv4(),
+    provider: item.provider,
+    Region: item.Region,
+    averagePrice: item.averagePrice,
+    isRegionBased: true,
+    InstanceType: 'N/A',
+    vCPUs: 0,
+    ram: 0,
+    GPUCount: 0,
+    InstanceFamily: 'General',
+  }));
 };
 
 // Proxy to CloudPrice API to fetch data for all providers
@@ -129,9 +182,11 @@ router.get('/', async (req, res) => {
       : ['aws', 'azure', 'gcp'];
 
     const page = parseInt(req.query.page) || 1;
-    const limit = 10; // Items per page
+    const limit = 10;
     const searchTerm = req.query.searchTerm || '';
     const instanceTypes = req.query.instanceTypes ? req.query.instanceTypes.split(',') : [];
+    const currency = req.query.currency || 'USD';
+    const sortCategory = req.query.sortCategory || 'instancePricing'; // New: sort category
 
     const queryParams = providers.map(provider => provider !== 'azure' ? { paymentType: 'OnDemand' } : {});
     const fetchPromises = providers.map((provider, index) =>
@@ -153,7 +208,7 @@ router.get('/', async (req, res) => {
     // Apply instance types filter
     if (instanceTypes.length > 0) {
       combinedInstances = combinedInstances.filter(item => {
-        if (item.isRegionBased) return true; // Skip instance type filter for Azure region-based data
+        if (item.isRegionBased) return true;
         const instanceTypePrefix = (item.InstanceType || '').split('.')[0].toLowerCase();
         return instanceTypes.some(type => instanceTypePrefix === type.toLowerCase());
       });
@@ -169,7 +224,6 @@ router.get('/', async (req, res) => {
       const region = req.query.region;
 
       combinedInstances = combinedInstances.filter(item => {
-        // Skip certain filters for Azure region-based data
         if (item.isRegionBased) {
           const matchesRegion = region ? (item.Region || 'unknown') === region : true;
           return matchesRegion;
@@ -191,44 +245,115 @@ router.get('/', async (req, res) => {
       });
     }
 
-    const transformedData = combinedInstances.map(item => {
-      const provider = item.provider ? item.provider.toLowerCase() : 'unknown';
-      const vCPUs = item.ProcessorVCPUCount || item.vCPUs || 0;
-      const ram = item.MemorySizeInMB || item.ram || 0;
-      const price = item.PricePerHour || item.price || item.pricing?.onDemand || 0;
+    // Handle sorting category
+    let transformedData = [];
+    if (sortCategory === 'regionPricing') {
+      // Aggregate region pricing for AWS and GCP, Azure already has this
+      const regionPricingData = aggregateRegionPricing(combinedInstances.filter(item => !item.isRegionBased));
+      const azureRegionData = combinedInstances.filter(item => item.isRegionBased && item.provider === 'azure');
+      transformedData = [...regionPricingData, ...azureRegionData].map(item => ({
+        id: item.id,
+        provider: item.provider.toLowerCase(),
+        region: item.Region,
+        averagePrice: item.averagePrice || item.PricePerHour,
+        isRegionBased: true,
+      }));
+    } else if (sortCategory === 'spotPrice') {
+      transformedData = combinedInstances
+        .filter(item => !item.isRegionBased) // Spot pricing for instances only
+        .map(item => {
+          const price = item.PricePerHour || item.price || item.pricing?.onDemand || 0;
+          const spotPrice = item.spot || (price * 0.7); // Simulate spot price if not available
+          return {
+            id: item.id,
+            provider: item.provider.toLowerCase(),
+            instanceType: item.InstanceType || 'N/A',
+            region: item.Region || 'unknown',
+            spotPrice: spotPrice,
+            isRegionBased: false,
+          };
+        });
+    } else if (sortCategory === 'pricePerPerformance') {
+      transformedData = combinedInstances
+        .filter(item => !item.isRegionBased)
+        .map(item => {
+          const vCPUs = item.ProcessorVCPUCount || item.vCPUs || 0;
+          const ram = (item.MemorySizeInMB || item.ram || 0) / 1024;
+          const price = item.PricePerHour || item.price || item.pricing?.onDemand || 0;
+          const costPerVCPU = vCPUs > 0 ? price / vCPUs : 0;
+          const costPerGB = ram > 0 ? price / ram : 0;
+          return {
+            id: item.id,
+            provider: item.provider.toLowerCase(),
+            instanceType: item.InstanceType || 'N/A',
+            region: item.Region || 'unknown',
+            vCPUs: vCPUs,
+            ram: ram,
+            price: price,
+            costPerVCPU: costPerVCPU,
+            costPerGB: costPerGB,
+            performanceScore: (vCPUs * 0.6 + ram * 0.4) / (price || 1), // Simplified performance score
+            isRegionBased: false,
+          };
+        });
+    } else {
+      // Default: instancePricing
+      transformedData = combinedInstances.map(item => {
+        const provider = item.provider ? item.provider.toLowerCase() : 'unknown';
+        const vCPUs = item.ProcessorVCPUCount || item.vCPUs || 0;
+        const ram = item.MemorySizeInMB || item.ram || 0;
+        const price = item.PricePerHour || item.price || item.pricing?.onDemand || 0;
 
-      return {
-        id: item.id || uuidv4(),
-        provider: provider,
-        instanceType: item.InstanceType || 'N/A',
-        region: item.Region || 'unknown',
-        vCPUs: vCPUs,
-        ram: ram / 1024,
-        price: price,
-        costPerCore: vCPUs > 0 ? price / vCPUs : 0,
-        costPerGB: ram > 0 ? price / (ram / 1024) : 0,
-        category: item.InstanceFamily || 'general',
-        gpu: (item.GPUCount || item.GPU || 0) > 0,
-        gpuType: item.GPUType || undefined,
-        isRegionBased: item.isRegionBased || false,
-        specs: {
+        return {
+          id: item.id || uuidv4(),
+          provider: provider,
+          instanceType: item.InstanceType || 'N/A',
+          region: item.Region || 'unknown',
           vCPUs: vCPUs,
-          memory: ram / 1024,
-          architecture: item.ProcessorArchitecture?.[0] || 'x86_64',
-          networkThroughput: item.NetworkingPerformance || 'Up to 10 Gbps',
-          storage: item.InstanceStorage || 'EBS Only',
-          storageType: item.StorageType || 'Unknown', // Added for more detail
-          cpuModel: item.CPUModel || 'Unknown', // Added for more detail
+          ram: ram / 1024,
+          price: price,
+          costPerCore: vCPUs > 0 ? price / vCPUs : 0,
+          costPerGB: ram > 0 ? price / (ram / 1024) : 0,
+          category: item.InstanceFamily || 'general',
           gpu: (item.GPUCount || item.GPU || 0) > 0,
           gpuType: item.GPUType || undefined,
-        },
-        pricing: {
-          onDemand: price,
-          reserved: item.reserved || undefined,
-          spot: item.spot || undefined,
-        },
-        costPerVCPU: vCPUs > 0 ? price / vCPUs : 0,
-        costPerGB: ram > 0 ? price / (ram / 1024) : 0,
+          isRegionBased: item.isRegionBased || false,
+          isRDS: item.InstanceFamily === 'RDS', // Flag for RDS instances
+          specs: {
+            vCPUs: vCPUs,
+            memory: ram / 1024,
+            architecture: item.ProcessorArchitecture?.[0] || 'x86_64',
+            networkThroughput: item.NetworkingPerformance || 'Up to 10 Gbps',
+            storage: item.InstanceStorage || 'EBS Only',
+            storageType: item.StorageType || 'Unknown',
+            cpuModel: item.CPUModel || 'Unknown',
+            gpu: (item.GPUCount || item.GPU || 0) > 0,
+            gpuType: item.GPUType || undefined,
+          },
+          pricing: {
+            onDemand: price,
+            reserved: item.reserved || undefined,
+            spot: item.spot || (price * 0.7), // Simulate spot price
+          },
+          costPerVCPU: vCPUs > 0 ? price / vCPUs : 0,
+          costPerGB: ram > 0 ? price / (ram / 1024) : 0,
+        };
+      });
+    }
+
+    // Apply currency conversion (for Azure exchange rates)
+    transformedData = transformedData.map(item => {
+      let price = item.price || item.averagePrice || item.spotPrice || 0;
+      const convertedPrice = price * (EXCHANGE_RATES[currency] || 1);
+      return {
+        ...item,
+        price: item.price ? convertedPrice : item.price,
+        averagePrice: item.averagePrice ? convertedPrice : item.averagePrice,
+        spotPrice: item.spotPrice ? convertedPrice : item.spotPrice,
+        costPerCore: item.costPerCore ? item.costPerCore * (EXCHANGE_RATES[currency] || 1) : item.costPerCore,
+        costPerGB: item.costPerGB ? item.costPerGB * (EXCHANGE_RATES[currency] || 1) : item.costPerGB,
+        costPerVCPU: item.costPerVCPU ? item.costPerVCPU * (EXCHANGE_RATES[currency] || 1) : item.costPerVCPU,
+        currency: currency,
       };
     });
 
@@ -251,7 +376,8 @@ router.get('/', async (req, res) => {
 
     res.json({
       data: paginatedData,
-      pagination: { pages: totalPages }
+      pagination: { pages: totalPages },
+      currency: currency,
     });
   } catch (error) {
     logger.error('Error fetching data from CloudPrice API:', error);

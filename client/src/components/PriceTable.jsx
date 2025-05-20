@@ -2,24 +2,56 @@ import { motion } from 'framer-motion';
 import { ArrowUp, ArrowDown, Info, Eye, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 
-function PriceTable({ data, sortBy, sortOrder }) {
+function PriceTable({ data, sortBy, sortOrder, sortCategory, currency }) {
   const [hoveredRow, setHoveredRow] = useState(null);
   const [expandedRow, setExpandedRow] = useState(null);
 
-  const columns = [
-    { key: 'provider', label: 'Provider', tooltip: 'Cloud service provider' },
-    { key: 'instanceType', label: 'Instance Type', tooltip: 'Provider-specific instance identifier' },
-    { key: 'region', label: 'Region', tooltip: 'Geographic location of the instance' },
-    { key: 'vCPUs', label: 'vCPUs', tooltip: 'Number of virtual CPUs' },
-    { key: 'ram', label: 'RAM (GB)', tooltip: 'Amount of memory in gigabytes' },
-    { key: 'price', label: 'Price ($/hr)', tooltip: 'Hourly on-demand cost in USD' },
-    { key: 'costPerCore', label: 'Cost/Core', tooltip: 'Cost per vCPU core' },
-    { key: 'costPerGB', label: 'Cost/GB RAM', tooltip: 'Cost per GB of RAM' },
-  ];
+  // Define columns based on sortCategory
+  const getColumns = () => {
+    if (sortCategory === 'regionPricing') {
+      return [
+        { key: 'provider', label: 'Provider', tooltip: 'Cloud service provider' },
+        { key: 'region', label: 'Region', tooltip: 'Geographic location' },
+        { key: 'averagePrice', label: `Avg Price (${currency}/hr)`, tooltip: 'Average hourly price for the region' },
+      ];
+    } else if (sortCategory === 'spotPrice') {
+      return [
+        { key: 'provider', label: 'Provider', tooltip: 'Cloud service provider' },
+        { key: 'instanceType', label: 'Instance Type', tooltip: 'Provider-specific instance identifier' },
+        { key: 'region', label: 'Region', tooltip: 'Geographic location of the instance' },
+        { key: 'spotPrice', label: `Spot Price (${currency}/hr)`, tooltip: 'Spot price per hour' },
+      ];
+    } else if (sortCategory === 'pricePerPerformance') {
+      return [
+        { key: 'provider', label: 'Provider', tooltip: 'Cloud service provider' },
+        { key: 'instanceType', label: 'Instance Type', tooltip: 'Provider-specific instance identifier' },
+        { key: 'region', label: 'Region', tooltip: 'Geographic location of the instance' },
+        { key: 'vCPUs', label: 'vCPUs', tooltip: 'Number of virtual CPUs' },
+        { key: 'ram', label: 'RAM (GB)', tooltip: 'Amount of memory in gigabytes' },
+        { key: 'costPerVCPU', label: `Cost/vCPU (${currency})`, tooltip: 'Cost per vCPU' },
+        { key: 'costPerGB', label: `Cost/GB (${currency})`, tooltip: 'Cost per GB of RAM' },
+        { key: 'performanceScore', label: 'Performance Score', tooltip: 'Simplified performance score' },
+      ];
+    } else {
+      // Default: instancePricing (and rdsPricing)
+      return [
+        { key: 'provider', label: 'Provider', tooltip: 'Cloud service provider' },
+        { key: 'instanceType', label: 'Instance Type', tooltip: 'Provider-specific instance identifier' },
+        { key: 'region', label: 'Region', tooltip: 'Geographic location of the instance' },
+        { key: 'vCPUs', label: 'vCPUs', tooltip: 'Number of virtual CPUs' },
+        { key: 'ram', label: 'RAM (GB)', tooltip: 'Amount of memory in gigabytes' },
+        { key: 'price', label: `Price (${currency}/hr)`, tooltip: 'Hourly on-demand cost' },
+        { key: 'costPerCore', label: `Cost/Core (${currency})`, tooltip: 'Cost per vCPU core' },
+        { key: 'costPerGB', label: `Cost/GB (${currency})`, tooltip: 'Cost per GB of RAM' },
+      ];
+    }
+  };
+
+  const columns = getColumns();
 
   const formatCurrency = (value) => {
     if (value === undefined || value === null) return '-';
-    return `$${value.toFixed(4)}`;
+    return `${currency} ${value.toFixed(4)}`;
   };
 
   const handleRowExpand = (id) => {
@@ -65,7 +97,7 @@ function PriceTable({ data, sortBy, sortOrder }) {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase">
-                 
+                &nbsp;
               </th>
               {columns.map((column) => (
                 <th
@@ -108,53 +140,117 @@ function PriceTable({ data, sortBy, sortOrder }) {
                       <Eye className="h-4 w-4" />
                     </button>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <span className={`px-2.5 py-1 rounded-md text-xs font-medium ${getProviderColor(instance.provider)}`}>
-                      {instance.provider}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-slate-800">
-                    {instance.instanceType}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
-                    {instance.region}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
-                    {instance.vCPUs}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
-                    {instance.ram}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-slate-800">
-                    {formatCurrency(instance.price)}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
-                    {formatCurrency(instance.costPerCore)}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
-                    {formatCurrency(instance.costPerGB)}
-                  </td>
+                  {sortCategory === 'regionPricing' ? (
+                    <>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className={`px-2.5 py-1 rounded-md text-xs font-medium ${getProviderColor(instance.provider)}`}>
+                          {instance.provider}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {instance.region}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-slate-800">
+                        {formatCurrency(instance.averagePrice)}
+                      </td>
+                    </>
+                  ) : sortCategory === 'spotPrice' ? (
+                    <>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className={`px-2.5 py-1 rounded-md text-xs font-medium ${getProviderColor(instance.provider)}`}>
+                          {instance.provider}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-slate-800">
+                        {instance.instanceType}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {instance.region}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-slate-800">
+                        {formatCurrency(instance.spotPrice)}
+                      </td>
+                    </>
+                  ) : sortCategory === 'pricePerPerformance' ? (
+                    <>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className={`px-2.5 py-1 rounded-md text-xs font-medium ${getProviderColor(instance.provider)}`}>
+                          {instance.provider}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-slate-800">
+                        {instance.instanceType}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {instance.region}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {instance.vCPUs}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {instance.ram}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {formatCurrency(instance.costPerVCPU)}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {formatCurrency(instance.costPerGB)}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {instance.performanceScore?.toFixed(2) || '-'}
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className={`px-2.5 py-1 rounded-md text-xs font-medium ${getProviderColor(instance.provider)}`}>
+                          {instance.provider}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-slate-800">
+                        {instance.instanceType}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {instance.region}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {instance.vCPUs}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {instance.ram}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-slate-800">
+                        {formatCurrency(instance.price)}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {formatCurrency(instance.costPerCore)}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-700">
+                        {formatCurrency(instance.costPerGB)}
+                      </td>
+                    </>
+                  )}
                 </tr>
-                
+
                 {expandedRow === instance.id && (
                   <tr className="bg-slate-50 border-b border-slate-200">
                     <td colSpan={columns.length + 1} className="px-8 py-6">
-                      {instance.isRegionBased ? (
+                      {sortCategory === 'regionPricing' || instance.isRegionBased ? (
                         <div className="text-sm text-slate-600">
                           <p className="text-orange-600 mb-4">
-                            Note: This is an average price for the region. Instance-specific details are not available for Azure at this time.
+                            Note: This is an average price for the region. Instance-specific details are not available for {instance.provider} at this time.
                           </p>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                              <h4 className="text-sm font-semibold text-slate-700 mb-3">Specification Details</h4>
+                              <h4 className="text-sm font-semibold text-slate-700 mb-3">Region Details</h4>
                               <div className="space-y-2">
                                 <div className="flex justify-between text-xs">
-                                  <span className="text-slate-500">Category:</span>
-                                  <span className="font-medium text-slate-700">{instance.category || 'General Purpose'}</span>
+                                  <span className="text-slate-500">Region:</span>
+                                  <span className="font-medium text-slate-700">{instance.region}</span>
                                 </div>
                                 <div className="flex justify-between text-xs">
-                                  <span className="text-slate-500">Region Average Price:</span>
-                                  <span className="font-medium text-slate-700">{formatCurrency(instance.price)}/hr</span>
+                                  <span className="text-slate-500">Average Price:</span>
+                                  <span className="font-medium text-slate-700">{formatCurrency(instance.averagePrice)}/hr</span>
                                 </div>
                               </div>
                             </div>
@@ -165,10 +261,6 @@ function PriceTable({ data, sortBy, sortOrder }) {
                                   <span className="text-slate-500">Provider:</span>
                                   <span className="font-medium text-slate-700">{instance.provider}</span>
                                 </div>
-                                <div className="flex justify-between text-xs">
-                                  <span className="text-slate-500">Region:</span>
-                                  <span className="font-medium text-slate-700">{instance.region}</span>
-                                </div>
                                 <div className="mt-4">
                                   <a 
                                     href={getProviderDocLink(instance.provider, instance.instanceType)}
@@ -176,10 +268,126 @@ function PriceTable({ data, sortBy, sortOrder }) {
                                     rel="noopener noreferrer"
                                     className="text-xs inline-flex items-center gap-1 text-blue-600 hover:text-blue-800"
                                   >
-                                    <span>Learn more about Azure pricing</span>
+                                    <span>Learn more about {instance.provider} pricing</span>
                                     <ExternalLink className="w-3 h-3" />
                                   </a>
                                 </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : sortCategory === 'spotPrice' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div>
+                            <h4 className="text-sm font-semibold text-slate-700 mb-3">Instance Details</h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Instance Type:</span>
+                                <span className="font-medium text-slate-700">{instance.instanceType}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Region:</span>
+                                <span className="font-medium text-slate-700">{instance.region}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-semibold text-slate-700 mb-3">Spot Pricing</h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Spot Price:</span>
+                                <span className="font-medium text-slate-700">{formatCurrency(instance.spotPrice)}/hr</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">On-Demand Price:</span>
+                                <span className="font-medium text-slate-700">{formatCurrency(instance.price)}/hr</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-semibold text-slate-700 mb-3">Provider Details</h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Provider:</span>
+                                <span className="font-medium text-slate-700">{instance.provider}</span>
+                              </div>
+                              <div className="mt-4">
+                                <a 
+                                  href={getProviderDocLink(instance.provider, instance.instanceType)}
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-xs inline-flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                                >
+                                  <span>Learn more about this instance</span>
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : sortCategory === 'pricePerPerformance' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div>
+                            <h4 className="text-sm font-semibold text-slate-700 mb-3">Performance Metrics</h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Performance Score:</span>
+                                <span className="font-medium text-slate-700">{instance.performanceScore?.toFixed(2) || '-'}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Cost per vCPU:</span>
+                                <span className="font-medium text-slate-700">{formatCurrency(instance.costPerVCPU)}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Cost per GB RAM:</span>
+                                <span className="font-medium text-slate-700">{formatCurrency(instance.costPerGB)}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-semibold text-slate-700 mb-3">Instance Specs</h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">vCPUs:</span>
+                                <span className="font-medium text-slate-700">{instance.vCPUs}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">RAM:</span>
+                                <span className="font-medium text-slate-700">{instance.ram} GB</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">GPU:</span>
+                                <span className="font-medium text-slate-700">
+                                  {instance.gpu ? `Yes (${instance.gpuType || 'Unknown type'})` : 'No'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-semibold text-slate-700 mb-3">Provider Details</h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Provider:</span>
+                                <span className="font-medium text-slate-700">{instance.provider}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Region:</span>
+                                <span className="font-medium text-slate-700">{instance.region}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Instance Type:</span>
+                                <span className="font-medium text-slate-700">{instance.instanceType}</span>
+                              </div>
+                              <div className="mt-4">
+                                <a 
+                                  href={getProviderDocLink(instance.provider, instance.instanceType)}
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-xs inline-flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                                >
+                                  <span>Learn more about this instance</span>
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
                               </div>
                             </div>
                           </div>
@@ -219,6 +427,12 @@ function PriceTable({ data, sortBy, sortOrder }) {
                                   {instance.gpu ? `Yes (${instance.gpuType || 'Unknown type'})` : 'No'}
                                 </span>
                               </div>
+                              {instance.isRDS && (
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-slate-500">Service:</span>
+                                  <span className="font-medium text-slate-700">RDS</span>
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div>

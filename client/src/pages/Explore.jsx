@@ -20,6 +20,7 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
+  Globe2,
 } from "lucide-react";
 import PriceFilters from "../components/PriceFilters";
 import PriceTable from "../components/PriceTable";
@@ -65,12 +66,35 @@ const providerLogos = {
   ),
 };
 
+const SORT_CATEGORIES = {
+  aws: [
+    { value: 'instancePricing', label: 'EC2 Instances' },
+    { value: 'rdsPricing', label: 'RDS Instances' },
+    { value: 'spotPrice', label: 'Spot Price History' },
+    { value: 'regionPricing', label: 'Region Pricing' },
+  ],
+  azure: [
+    { value: 'instancePricing', label: 'Virtual Machines' },
+    { value: 'spotPrice', label: 'Spot Price History' },
+    { value: 'regionPricing', label: 'Region Pricing' },
+    { value: 'pricePerPerformance', label: 'VMs Price/Performance' },
+  ],
+  gcp: [
+    { value: 'instancePricing', label: 'Compute Engine Instances' },
+    { value: 'spotPrice', label: 'Spot Price History' },
+    { value: 'regionPricing', label: 'Region Pricing' },
+    { value: 'pricePerPerformance', label: 'Instances Price/Performance' },
+  ],
+};
+
 function Explore() {
   const [view, setView] = useState("table");
   const [isFilterOpen, setIsFilterOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("price");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [sortCategory, setSortCategory] = useState("instancePricing");
+  const [currency, setCurrency] = useState("USD");
   const [selectedProviders, setSelectedProviders] = useState([
     "aws",
     "azure",
@@ -85,6 +109,7 @@ function Explore() {
     ram: [0, 64],
     gpu: false,
     instanceTypes: [],
+    includeRDS: false, // New filter for RDS
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -113,7 +138,9 @@ function Explore() {
         sortOrder,
         page,
         searchTerm: searchQuery,
-        instanceTypes: filters.instanceTypes.join(","), // Add instanceTypes to query
+        instanceTypes: filters.instanceTypes.join(","),
+        sortCategory: sortCategory, // Pass sort category
+        currency: currency, // Pass currency
       };
       if (filters.regions.length > 0) {
         filterParams.region = filters.regions[0];
@@ -128,16 +155,22 @@ function Explore() {
         vCPUs: item.vCPUs,
         ram: item.ram,
         price: item.price,
+        averagePrice: item.averagePrice,
+        spotPrice: item.spotPrice,
         costPerCore: item.costPerCore,
         costPerGB: item.costPerGB,
+        costPerVCPU: item.costPerVCPU,
+        performanceScore: item.performanceScore,
         instanceType: item.instanceType,
         specs: item.specs,
         gpu: item.gpu,
         gpuType: item.gpuType,
-        reserved: item.pricing.reserved,
-        spot: item.pricing.spot,
+        reserved: item.pricing?.reserved,
+        spot: item.pricing?.spot,
         category: item.category,
-        isRegionBased: item.isRegionBased, // Add isRegionBased flag
+        isRegionBased: item.isRegionBased,
+        isRDS: item.isRDS,
+        currency: res.currency || 'USD',
       }));
 
       setData(transformedData);
@@ -156,11 +189,14 @@ function Explore() {
 
   useEffect(() => {
     fetchData();
-  }, [selectedProviders, filters, sortBy, sortOrder, page, searchQuery]);
+  }, [selectedProviders, filters, sortBy, sortOrder, sortCategory, currency, page, searchQuery]);
 
   const handleProviderChange = (providers) => {
     setSelectedProviders(providers);
     setPage(1);
+    // Reset sort category to a valid option for the selected providers
+    const provider = providers.length === 1 ? providers[0] : 'aws';
+    setSortCategory(SORT_CATEGORIES[provider][0].value);
   };
 
   const sortedData = [...data].sort((a, b) => {
@@ -180,25 +216,23 @@ function Explore() {
   const getStats = () => {
     if (!sortedData.length) return null;
 
-    const totalInstances = totalPages * 10; // 10 is the limit per page from compare.js
+    const totalInstances = totalPages * 10;
     const avgPrice =
-      sortedData.reduce((sum, item) => sum + (item.price || 0), 0) / sortedData.length;
-    const minPrice = Math.min(...sortedData.map((item) => item.price || 0));
-    const maxPrice = Math.max(...sortedData.map((item) => item.price || 0));
+      sortedData.reduce((sum, item) => sum + (item.price || item.averagePrice || item.spotPrice || 0), 0) / sortedData.length;
+    const minPrice = Math.min(...sortedData.map((item) => item.price || item.averagePrice || item.spotPrice || 0));
+    const maxPrice = Math.max(...sortedData.map((item) => item.price || item.averagePrice || item.spotPrice || 0));
 
     return { avgPrice, minPrice, maxPrice, totalInstances };
   };
 
   const stats = getStats();
 
-  // Check if Azure data lacks instance details
   const hasAzureDataWithoutInstances =
     selectedProviders.includes("azure") &&
     sortedData.some(
       (item) => item.provider === "AZURE" && item.isRegionBased
     );
 
-  // Check if Azure data is filtered out due to vCPUs, RAM, or GPU filters
   const azureFilteredOut =
     selectedProviders.includes("azure") &&
     sortedData.every((item) => item.provider !== "AZURE") &&
@@ -214,6 +248,19 @@ function Explore() {
     if (page < totalPages) {
       setPage(page + 1);
     }
+  };
+
+  const getSortCategoryOptions = () => {
+    if (selectedProviders.length === 1) {
+      return SORT_CATEGORIES[selectedProviders[0]] || SORT_CATEGORIES.aws;
+    }
+    // If multiple providers are selected, show a combined set of options
+    return [
+      { value: 'instancePricing', label: 'Instances' },
+      { value: 'spotPrice', label: 'Spot Price History' },
+      { value: 'regionPricing', label: 'Region Pricing' },
+      { value: 'pricePerPerformance', label: 'Price/Performance' },
+    ];
   };
 
   return (
@@ -313,7 +360,7 @@ function Explore() {
                 <h3 className="text-slate-500 font-medium">Avg Price/hr</h3>
               </div>
               <p className="text-2xl font-bold text-slate-800">
-                ${stats.avgPrice.toFixed(4)}
+                {currency} {stats.avgPrice.toFixed(4)}
               </p>
             </div>
 
@@ -325,7 +372,7 @@ function Explore() {
                 <h3 className="text-slate-500 font-medium">Price Range</h3>
               </div>
               <p className="text-2xl font-bold text-slate-800">
-                ${stats.minPrice.toFixed(4)} - ${stats.maxPrice.toFixed(4)}
+                {currency} {stats.minPrice.toFixed(4)} - {currency} {stats.maxPrice.toFixed(4)}
               </p>
             </div>
 
@@ -382,7 +429,7 @@ function Explore() {
         )}
 
         <motion.div
-          key={selectedProviders.join(",")} // Added to force animation re-run
+          key={selectedProviders.join(",")}
           className="bg-white rounded-2xl shadow-lg p-5 mb-6 border border-slate-100"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -430,15 +477,49 @@ function Explore() {
 
               <div className="flex items-center rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
                 <select
+                  value={sortCategory}
+                  onChange={(e) => setSortCategory(e.target.value)}
+                  className="px-4 py-3 focus:outline-none text-slate-700 border-r border-slate-200 bg-white"
+                >
+                  {getSortCategoryOptions().map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+                <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                   className="px-4 py-3 focus:outline-none text-slate-700 border-r border-slate-200 bg-white"
                 >
-                  <option value="price">Sort by Price</option>
-                  <option value="costPerCore">Sort by Cost/Core</option>
-                  <option value="costPerGB">Sort by Cost/GB</option>
-                  <option value="vCPUs">Sort by vCPUs</option>
-                  <option value="ram">Sort by RAM</option>
+                  {sortCategory === 'regionPricing' ? (
+                    <>
+                      <option value="averagePrice">Sort by Avg Price</option>
+                      <option value="region">Sort by Region</option>
+                    </>
+                  ) : sortCategory === 'spotPrice' ? (
+                    <>
+                      <option value="spotPrice">Sort by Spot Price</option>
+                      <option value="instanceType">Sort by Instance Type</option>
+                    </>
+                  ) : sortCategory === 'pricePerPerformance' ? (
+                    <>
+                      <option value="performanceScore">Sort by Performance Score</option>
+                      <option value="costPerVCPU">Sort by Cost/vCPU</option>
+                      <option value="costPerGB">Sort by Cost/GB</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="price">Sort by Price</option>
+                      <option value="costPerCore">Sort by Cost/Core</option>
+                      <option value="costPerGB">Sort by Cost/GB</option>
+                      <option value="vCPUs">Sort by vCPUs</option>
+                      <option value="ram">Sort by RAM</option>
+                    </>
+                  )}
                 </select>
                 <button
                   onClick={() =>
@@ -456,6 +537,21 @@ function Explore() {
                   )}
                 </button>
               </div>
+
+              {selectedProviders.includes('azure') && (
+                <div className="flex items-center rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+                  <select
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="px-4 py-3 focus:outline-none text-slate-700 bg-white"
+                  >
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                    <option value="INR">INR</option>
+                  </select>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
@@ -546,7 +642,7 @@ function Explore() {
                     <path
                       className="opacity-75"
                       fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5. Includes 0 to ensure Azure data isn't filtered out by default373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
                 </div>
@@ -598,6 +694,8 @@ function Explore() {
                   data={sortedData}
                   sortBy={sortBy}
                   sortOrder={sortOrder}
+                  sortCategory={sortCategory}
+                  currency={currency}
                 />
               </div>
             ) : (
