@@ -593,3 +593,23 @@
 {"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T18:58:32.052Z"}
 {"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T18:58:32.627Z"}
 {"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:58:34.101Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T19:00:01.623Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T19:00:02.682Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=gcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T19:00:06.195Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=azure&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T19:00:08.226Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T19:00:09.646Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T19:17:14.736Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T19:28:22.406Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T19:28:22.412Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T19:28:22.413Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T19:28:22.413Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T19:28:22.414Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T19:28:22.414Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T19:28:22.426Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T19:28:22.988Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=&instanceTypes=","timestamp":"2025-05-20T19:31:31.014Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=&instanceTypes=","timestamp":"2025-05-20T19:31:50.301Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=&instanceTypes=","timestamp":"2025-05-20T19:32:42.751Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=gcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=&instanceTypes=","timestamp":"2025-05-20T19:32:53.104Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=gcp&minCpu=0&maxCpu=16&minMemory=23&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=&instanceTypes=","timestamp":"2025-05-20T19:33:03.070Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=gcp&minCpu=0&maxCpu=16&minMemory=23&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=&instanceTypes=&region=us-central1","timestamp":"2025-05-20T19:33:11.927Z"}

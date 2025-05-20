@@ -39,6 +39,20 @@ function PriceTable({ data, sortBy, sortOrder }) {
     }
   };
 
+  const getProviderDocLink = (provider, instanceType) => {
+    const providerLower = provider.toLowerCase();
+    if (providerLower === 'aws') {
+      const family = instanceType.split('.')[0];
+      return `https://aws.amazon.com/ec2/instance-types/${family.toLowerCase()}/`;
+    } else if (providerLower === 'azure') {
+      return 'https://azure.microsoft.com/en-us/pricing/details/virtual-machines/';
+    } else if (providerLower === 'gcp') {
+      const family = instanceType.split('-')[0];
+      return `https://cloud.google.com/compute/docs/machine-types#${family.toLowerCase()}`;
+    }
+    return '#';
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -51,7 +65,7 @@ function PriceTable({ data, sortBy, sortOrder }) {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase">
-                &nbsp;
+                 
               </th>
               {columns.map((column) => (
                 <th
@@ -125,96 +139,139 @@ function PriceTable({ data, sortBy, sortOrder }) {
                 {expandedRow === instance.id && (
                   <tr className="bg-slate-50 border-b border-slate-200">
                     <td colSpan={columns.length + 1} className="px-8 py-6">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                          <h4 className="text-sm font-semibold text-slate-700 mb-3">Specification Details</h4>
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Category:</span>
-                              <span className="font-medium text-slate-700">{instance.category || 'General Purpose'}</span>
+                      {instance.isRegionBased ? (
+                        <div className="text-sm text-slate-600">
+                          <p className="text-orange-600 mb-4">
+                            Note: This is an average price for the region. Instance-specific details are not available for Azure at this time.
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                              <h4 className="text-sm font-semibold text-slate-700 mb-3">Specification Details</h4>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-slate-500">Category:</span>
+                                  <span className="font-medium text-slate-700">{instance.category || 'General Purpose'}</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-slate-500">Region Average Price:</span>
+                                  <span className="font-medium text-slate-700">{formatCurrency(instance.price)}/hr</span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Architecture:</span>
-                              <span className="font-medium text-slate-700">{instance.specs?.architecture || 'x86_64'}</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Network:</span>
-                              <span className="font-medium text-slate-700">{instance.specs?.networkThroughput || 'Up to 10 Gbps'}</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Storage:</span>
-                              <span className="font-medium text-slate-700">{instance.specs?.storage || 'EBS Only'} GB</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">GPU:</span>
-                              <span className="font-medium text-slate-700">
-                                {instance.gpu ? `Yes (${instance.gpuType || 'Unknown type'})` : 'No'}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="text-sm font-semibold text-slate-700 mb-3">Pricing Options</h4>
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">On-Demand:</span>
-                              <span className="font-medium text-slate-700">{formatCurrency(instance.price)}/hr</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Reserved (1yr):</span>
-                              <span className="font-medium text-slate-700">{formatCurrency(instance.reserved)}/hr</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Spot/Preemptible:</span>
-                              <span className="font-medium text-slate-700">{formatCurrency(instance.spot)}/hr</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Cost per vCPU:</span>
-                              <span className="font-medium text-slate-700">{formatCurrency(instance.costPerCore)}/hr</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Cost per GB RAM:</span>
-                              <span className="font-medium text-slate-700">{formatCurrency(instance.costPerGB)}/hr</span>
+                            <div>
+                              <h4 className="text-sm font-semibold text-slate-700 mb-3">Provider Details</h4>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-slate-500">Provider:</span>
+                                  <span className="font-medium text-slate-700">{instance.provider}</span>
+                                </div>
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-slate-500">Region:</span>
+                                  <span className="font-medium text-slate-700">{instance.region}</span>
+                                </div>
+                                <div className="mt-4">
+                                  <a 
+                                    href={getProviderDocLink(instance.provider, instance.instanceType)}
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-xs inline-flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                                  >
+                                    <span>Learn more about Azure pricing</span>
+                                    <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
-                        
-                        <div>
-                          <h4 className="text-sm font-semibold text-slate-700 mb-3">Provider Details</h4>
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Provider:</span>
-                              <span className="font-medium text-slate-700">{instance.provider}</span>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div>
+                            <h4 className="text-sm font-semibold text-slate-700 mb-3">Specification Details</h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Category:</span>
+                                <span className="font-medium text-slate-700">{instance.category || 'General Purpose'}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Architecture:</span>
+                                <span className="font-medium text-slate-700">{instance.specs?.architecture || 'x86_64'}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">CPU Model:</span>
+                                <span className="font-medium text-slate-700">{instance.specs?.cpuModel || 'Unknown'}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Network Throughput:</span>
+                                <span className="font-medium text-slate-700">{instance.specs?.networkThroughput || 'Up to 10 Gbps'}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Storage:</span>
+                                <span className="font-medium text-slate-700">{instance.specs?.storage || 'EBS Only'}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Storage Type:</span>
+                                <span className="font-medium text-slate-700">{instance.specs?.storageType || 'Unknown'}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">GPU:</span>
+                                <span className="font-medium text-slate-700">
+                                  {instance.gpu ? `Yes (${instance.gpuType || 'Unknown type'})` : 'No'}
+                                </span>
+                              </div>
                             </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Region:</span>
-                              <span className="font-medium text-slate-700">{instance.region}</span>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-semibold text-slate-700 mb-3">Pricing Options</h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">On-Demand:</span>
+                                <span className="font-medium text-slate-700">{formatCurrency(instance.price)}/hr</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Reserved:</span>
+                                <span className="font-medium text-slate-700">
+                                  {instance.reserved ? formatCurrency(instance.reserved) + '/hr' : 'N/A'}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Spot:</span>
+                                <span className="font-medium text-slate-700">
+                                  {instance.spot ? formatCurrency(instance.spot) + '/hr' : 'N/A'}
+                                </span>
+                              </div>
                             </div>
-                            <div className="flex justify-between text-xs">
-                              <span className="text-slate-500">Instance Family:</span>
-                              <span className="font-medium text-slate-700">
-                                {instance.instanceType.split('.')[0] || instance.instanceType}
-                              </span>
-                            </div>
-                            <div className="mt-4">
-                              <a 
-                                href={`https://${instance.provider.toLowerCase() === 'aws' 
-                                  ? 'aws.amazon.com/ec2/instance-types/' 
-                                  : instance.provider.toLowerCase() === 'azure' 
-                                    ? 'azure.microsoft.com/en-us/pricing/details/virtual-machines/'
-                                    : 'cloud.google.com/compute/vm-instance-pricing'}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-xs inline-flex items-center gap-1 text-blue-600 hover:text-blue-800"
-                              >
-                                <span>Provider documentation</span>
-                                <ExternalLink className="w-3 h-3" />
-                              </a>
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-semibold text-slate-700 mb-3">Provider Details</h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Provider:</span>
+                                <span className="font-medium text-slate-700">{instance.provider}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Region:</span>
+                                <span className="font-medium text-slate-700">{instance.region}</span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className="text-slate-500">Instance Type:</span>
+                                <span className="font-medium text-slate-700">{instance.instanceType}</span>
+                              </div>
+                              <div className="mt-4">
+                                <a 
+                                  href={getProviderDocLink(instance.provider, instance.instanceType)}
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-xs inline-flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                                >
+                                  <span>Learn more about this instance</span>
+                                  <ExternalLink className="w-3 h-3" />
+                                </a>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      )}
                     </td>
                   </tr>
                 )}

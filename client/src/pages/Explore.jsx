@@ -113,6 +113,7 @@ function Explore() {
         sortOrder,
         page,
         searchTerm: searchQuery,
+        instanceTypes: filters.instanceTypes.join(","), // Add instanceTypes to query
       };
       if (filters.regions.length > 0) {
         filterParams.region = filters.regions[0];
@@ -136,6 +137,7 @@ function Explore() {
         reserved: item.pricing.reserved,
         spot: item.pricing.spot,
         category: item.category,
+        isRegionBased: item.isRegionBased, // Add isRegionBased flag
       }));
 
       setData(transformedData);
@@ -193,8 +195,14 @@ function Explore() {
   const hasAzureDataWithoutInstances =
     selectedProviders.includes("azure") &&
     sortedData.some(
-      (item) => item.provider === "AZURE" && item.instanceType === "N/A"
+      (item) => item.provider === "AZURE" && item.isRegionBased
     );
+
+  // Check if Azure data is filtered out due to vCPUs, RAM, or GPU filters
+  const azureFilteredOut =
+    selectedProviders.includes("azure") &&
+    sortedData.every((item) => item.provider !== "AZURE") &&
+    (filters.vCPUs[0] > 0 || filters.ram[0] > 0 || filters.gpu);
 
   const handlePreviousPage = () => {
     if (page > 1) {
@@ -356,6 +364,19 @@ function Explore() {
           >
             <p>
               Note: Azure data currently shows average prices per region. Instance-specific details are not available.
+            </p>
+          </motion.div>
+        )}
+
+        {azureFilteredOut && !loading && !error && (
+          <motion.div
+            className="mb-6 text-center text-sm text-orange-600 bg-orange-50 p-4 rounded-xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <p>
+              Warning: Azure data may be filtered out due to vCPUs, RAM, or GPU filters, as Azure data is region-based and lacks instance-specific details.
             </p>
           </motion.div>
         )}
@@ -525,7 +546,7 @@ function Explore() {
                     <path
                       className="opacity-75"
                       fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5. Includes 0 to ensure Azure data isn't filtered out by default373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
                 </div>

@@ -74,13 +74,14 @@ const fetchInstancesForProvider = async (provider, queryParams) => {
         instances = data.PricesPerRegion.map(item => ({
           id: uuidv4(),
           provider: provider,
-          Region: item.regionId || 'unknown', // Use regionId as the region
-          PricePerHour: item.averagePrice || 0, // Use averagePrice as the price
-          InstanceType: 'N/A', // Placeholder since we don't have instance data
-          ProcessorVCPUCount: 0, // Placeholder
-          MemorySizeInMB: 0, // Placeholder
-          GPUCount: 0, // Placeholder
-          InstanceFamily: 'General', // Placeholder
+          Region: item.regionId || 'unknown',
+          PricePerHour: item.averagePrice || 0,
+          InstanceType: 'N/A',
+          ProcessorVCPUCount: 0,
+          MemorySizeInMB: 0,
+          GPUCount: 0,
+          InstanceFamily: 'General',
+          isRegionBased: true, // Flag to indicate this is a region-based average
         }));
       } else {
         logger.warn(`Unexpected response format for ${provider}: Expected an object with PricesPerRegion array`);
@@ -94,6 +95,7 @@ const fetchInstancesForProvider = async (provider, queryParams) => {
           ...item,
           provider: provider,
           Region: item.Region || (data.Data && data.Data.Region) || 'unknown',
+          isRegionBased: false,
         }));
       } else if (Array.isArray(data)) {
         logger.info(`Found instance array directly in data`);
@@ -101,6 +103,7 @@ const fetchInstancesForProvider = async (provider, queryParams) => {
           ...item,
           provider: provider,
           Region: item.Region || 'unknown',
+          isRegionBased: false,
         }));
       } else {
         logger.error(`Unexpected response format for ${provider}: No valid instance array found`);
@@ -128,6 +131,7 @@ router.get('/', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 10; // Items per page
     const searchTerm = req.query.searchTerm || '';
+    const instanceTypes = req.query.instanceTypes ? req.query.instanceTypes.split(',') : [];
 
     const queryParams = providers.map(provider => provider !== 'azure' ? { paymentType: 'OnDemand' } : {});
     const fetchPromises = providers.map((provider, index) =>
@@ -146,7 +150,16 @@ router.get('/', async (req, res) => {
       );
     }
 
-    // Apply filters
+    // Apply instance types filter
+    if (instanceTypes.length > 0) {
+      combinedInstances = combinedInstances.filter(item => {
+        if (item.isRegionBased) return true; // Skip instance type filter for Azure region-based data
+        const instanceTypePrefix = (item.InstanceType || '').split('.')[0].toLowerCase();
+        return instanceTypes.some(type => instanceTypePrefix === type.toLowerCase());
+      });
+    }
+
+    // Apply filters (vCPUs, RAM, GPU, Region)
     if (req.query.minCpu || req.query.maxCpu || req.query.minMemory || req.query.maxMemory || req.query.gpu || req.query.region) {
       const minVCPUs = parseInt(req.query.minCpu) || 0;
       const maxVCPUs = parseInt(req.query.maxCpu) || Infinity;
@@ -156,6 +169,12 @@ router.get('/', async (req, res) => {
       const region = req.query.region;
 
       combinedInstances = combinedInstances.filter(item => {
+        // Skip certain filters for Azure region-based data
+        if (item.isRegionBased) {
+          const matchesRegion = region ? (item.Region || 'unknown') === region : true;
+          return matchesRegion;
+        }
+
         const vCPUs = item.ProcessorVCPUCount || item.vCPUs || 0;
         const ram = (item.MemorySizeInMB || item.ram || 0) / 1024;
         const hasGpu = (item.GPUCount || item.GPU || 0) > 0;
@@ -191,12 +210,15 @@ router.get('/', async (req, res) => {
         category: item.InstanceFamily || 'general',
         gpu: (item.GPUCount || item.GPU || 0) > 0,
         gpuType: item.GPUType || undefined,
+        isRegionBased: item.isRegionBased || false,
         specs: {
           vCPUs: vCPUs,
           memory: ram / 1024,
           architecture: item.ProcessorArchitecture?.[0] || 'x86_64',
           networkThroughput: item.NetworkingPerformance || 'Up to 10 Gbps',
           storage: item.InstanceStorage || 'EBS Only',
+          storageType: item.StorageType || 'Unknown', // Added for more detail
+          cpuModel: item.CPUModel || 'Unknown', // Added for more detail
           gpu: (item.GPUCount || item.GPU || 0) > 0,
           gpuType: item.GPUType || undefined,
         },

@@ -49,18 +49,19 @@ function PriceFilters({ filters, setFilters, selectedProviders, setSelectedProvi
     }));
   };
 
-  const handleRangeChange = (field, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleRangeChange = (field, index, value) => {
+    setFilters(prev => {
+      const newRange = [...prev[field]];
+      newRange[index] = parseInt(value);
+      return { ...prev, [field]: newRange };
+    });
   };
 
   const clearFilters = () => {
     setFilters({
       regions: [],
-      vCPUs: [1, 16],
-      ram: [1, 64],
+      vCPUs: [0, 16],
+      ram: [0, 64],
       gpu: false,
       instanceTypes: [],
     });
@@ -173,17 +174,31 @@ function PriceFilters({ filters, setFilters, selectedProviders, setSelectedProvi
             <h3 className="font-medium">vCPUs Range</h3>
           </div>
           <div className="px-2">
-            <input
-              type="range"
-              min="1"
-              max="64"
-              value={filters.vCPUs[1]}
-              onChange={(e) => handleRangeChange('vCPUs', [filters.vCPUs[0], parseInt(e.target.value)])}
-              className="w-full"
-            />
-            <div className="flex justify-between text-sm text-gray-500 mt-1">
-              <span>{filters.vCPUs[0]} vCPUs</span>
-              <span>{filters.vCPUs[1]} vCPUs</span>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="text-sm text-gray-500">Min</label>
+                <input
+                  type="range"
+                  min="0"
+                  max={filters.vCPUs[1]}
+                  value={filters.vCPUs[0]}
+                  onChange={(e) => handleRangeChange('vCPUs', 0, e.target.value)}
+                  className="w-full"
+                />
+                <span className="text-sm text-gray-500">{filters.vCPUs[0]} vCPUs</span>
+              </div>
+              <div className="flex-1">
+                <label className="text-sm text-gray-500">Max</label>
+                <input
+                  type="range"
+                  min={filters.vCPUs[0]}
+                  max="64"
+                  value={filters.vCPUs[1]}
+                  onChange={(e) => handleRangeChange('vCPUs', 1, e.target.value)}
+                  className="w-full"
+                />
+                <span className="text-sm text-gray-500">{filters.vCPUs[1]} vCPUs</span>
+              </div>
             </div>
           </div>
         </div>
@@ -195,17 +210,31 @@ function PriceFilters({ filters, setFilters, selectedProviders, setSelectedProvi
             <h3 className="font-medium">RAM Range (GB)</h3>
           </div>
           <div className="px-2">
-            <input
-              type="range"
-              min="1"
-              max="256"
-              value={filters.ram[1]}
-              onChange={(e) => handleRangeChange('ram', [filters.ram[0], parseInt(e.target.value)])}
-              className="w-full"
-            />
-            <div className="flex justify-between text-sm text-gray-500 mt-1">
-              <span>{filters.ram[0]} GB</span>
-              <span>{filters.ram[1]} GB</span>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="text-sm text-gray-500">Min</label>
+                <input
+                  type="range"
+                  min="0"
+                  max={filters.ram[1]}
+                  value={filters.ram[0]}
+                  onChange={(e) => handleRangeChange('ram', 0, e.target.value)}
+                  className="w-full"
+                />
+                <span className="text-sm text-gray-500">{filters.ram[0]} GB</span>
+              </div>
+              <div className="flex-1">
+                <label className="text-sm text-gray-500">Max</label>
+                <input
+                  type="range"
+                  min={filters.ram[0]}
+                  max="256"
+                  value={filters.ram[1]}
+                  onChange={(e) => handleRangeChange('ram', 1, e.target.value)}
+                  className="w-full"
+                />
+                <span className="text-sm text-gray-500">{filters.ram[1]} GB</span>
+              </div>
             </div>
           </div>
         </div>
