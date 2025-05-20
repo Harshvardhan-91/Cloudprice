@@ -24,7 +24,7 @@ import {
 import PriceFilters from "../components/PriceFilters";
 import PriceTable from "../components/PriceTable";
 import PriceChart from "../components/PriceChart";
-import { fetchInstances, compareInstances } from "../api";
+import { compareInstances } from "../api";
 
 const PROVIDERS = [
   {
@@ -96,7 +96,6 @@ function Explore() {
     setLoading(true);
     setError(null);
     try {
-      // Use the enhanced compareInstances API for better filtering
       const filterParams = {
         providers: selectedProviders.join(","),
         minCpu: filters.vCPUs[0],
@@ -120,42 +119,35 @@ function Explore() {
         filterParams.region = filters.regions[0];
       }
 
-      if (filters.regions.length > 0) {
-        filterParams.region = filters.regions[0]; // Use first selected region
-      }
-
       const res = await compareInstances(filterParams);
 
       const transformedData = (res.data || []).map((item) => ({
-        id: item._id,
+        id: item.id,
         provider: item.provider.toUpperCase(),
         region: item.region,
-        vCPUs: item.specs.vCPUs,
-        ram: item.specs.memory,
-        price: item.pricing.onDemand,
-        costPerCore:
-          item.costPerVCPU || item.pricing.onDemand / item.specs.vCPUs,
-        costPerGB: item.costPerGB || item.pricing.onDemand / item.specs.memory,
+        vCPUs: item.vCPUs,
+        ram: item.ram,
+        price: item.price,
+        costPerCore: item.costPerCore,
+        costPerGB: item.costPerGB,
         instanceType: item.instanceType,
         specs: item.specs,
-        gpu: item.specs.gpu,
-        gpuType: item.specs.gpuType,
+        gpu: item.gpu,
+        gpuType: item.gpuType,
         reserved: item.pricing.reserved,
         spot: item.pricing.spot,
         category: item.category,
       }));
 
       setData(transformedData);
+      setTotalPages(res.pagination?.pages || 1);
 
-      if (res.pagination) {
-        setTotalPages(res.pagination.pages);
-      }
-
-      if (res.data.length === 0) {
+      if (!res.data || res.data.length === 0) {
         setError(`No instances found matching the current filters.`);
       }
     } catch (err) {
-      setError(err.message);
+      setError(`Unable to fetch the requested data: ${err.message}`);
+      setData([]);
     } finally {
       setLoading(false);
     }
@@ -165,13 +157,11 @@ function Explore() {
     fetchData();
   }, [selectedProviders, filters, sortBy, sortOrder, page, searchQuery]);
 
-  // Handle provider selection change
   const handleProviderChange = (providers) => {
     setSelectedProviders(providers);
-    setPage(1); // Reset to first page
+    setPage(1);
   };
 
-  // Apply sorting
   const sortedData = [...data].sort((a, b) => {
     const aValue = a[sortBy] || 0;
     const bValue = b[sortBy] || 0;
@@ -186,14 +176,13 @@ function Explore() {
       ? PROVIDERS.find((p) => p.id === selectedProviders[0])
       : PROVIDERS[0];
 
-  // Get key stats
   const getStats = () => {
     if (!sortedData.length) return null;
 
     const avgPrice =
-      sortedData.reduce((sum, item) => sum + item.price, 0) / sortedData.length;
-    const minPrice = Math.min(...sortedData.map((item) => item.price));
-    const maxPrice = Math.max(...sortedData.map((item) => item.price));
+      sortedData.reduce((sum, item) => sum + (item.price || 0), 0) / sortedData.length;
+    const minPrice = Math.min(...sortedData.map((item) => item.price || 0));
+    const maxPrice = Math.max(...sortedData.map((item) => item.price || 0));
     const totalInstances = sortedData.length;
 
     return { avgPrice, minPrice, maxPrice, totalInstances };
@@ -201,7 +190,6 @@ function Explore() {
 
   const stats = getStats();
 
-  // Handle pagination
   const handlePreviousPage = () => {
     if (page > 1) {
       setPage(page - 1);
@@ -216,7 +204,6 @@ function Explore() {
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-slate-100">
-      {/* Decorative Elements */}
       <div className="absolute top-0 left-0 w-full h-64 overflow-hidden -z-10">
         <div
           className={`absolute inset-0 bg-gradient-to-r ${
@@ -227,7 +214,6 @@ function Explore() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -248,7 +234,6 @@ function Explore() {
           </div>
         </motion.div>
 
-        {/* Provider Selector */}
         <motion.div
           className="mb-8 flex justify-center"
           initial={{ opacity: 0, y: 20 }}
@@ -299,7 +284,6 @@ function Explore() {
           </div>
         </motion.div>
 
-        {/* Stats Cards */}
         {!loading && !error && stats && (
           <motion.div
             className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
@@ -357,7 +341,6 @@ function Explore() {
           </motion.div>
         )}
 
-        {/* Search and Controls */}
         <motion.div
           className="bg-white rounded-2xl shadow-lg p-5 mb-6 border border-slate-100"
           initial={{ opacity: 0, y: -10 }}
@@ -433,7 +416,6 @@ function Explore() {
           </div>
         </motion.div>
 
-        {/* Filters */}
         <AnimatePresence>
           {isFilterOpen && (
             <motion.div
@@ -450,7 +432,6 @@ function Explore() {
           )}
         </AnimatePresence>
 
-        {/* View Toggle */}
         <motion.div
           className="flex justify-center mb-6"
           initial={{ opacity: 0, y: -10 }}
@@ -487,7 +468,6 @@ function Explore() {
           </div>
         </motion.div>
 
-        {/* Data Display */}
         <AnimatePresence mode="wait">
           <motion.div
             key={view}
@@ -579,7 +559,6 @@ function Explore() {
           </motion.div>
         </AnimatePresence>
 
-        {/* Pagination */}
         {!loading && !error && totalPages > 1 && (
           <div className="flex justify-center mt-6">
             <div className="inline-flex rounded-xl overflow-hidden border border-slate-200 bg-white shadow">
@@ -616,7 +595,6 @@ function Explore() {
           </div>
         )}
 
-        {/* Provider Info Cards */}
         <motion.div
           className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6"
           initial={{ opacity: 0, y: 20 }}
@@ -669,7 +647,6 @@ function Explore() {
           </div>
         </motion.div>
 
-        {/* Footer */}
         <motion.div
           className="mt-10 pt-8 border-t border-slate-200 text-center text-slate-500 text-sm"
           initial={{ opacity: 0 }}
