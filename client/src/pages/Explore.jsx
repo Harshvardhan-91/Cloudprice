@@ -80,7 +80,6 @@ function Explore() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
-    providers: ["aws", "azure", "gcp"],
     regions: [],
     vCPUs: [1, 16],
     ram: [1, 64],
@@ -179,11 +178,11 @@ function Explore() {
   const getStats = () => {
     if (!sortedData.length) return null;
 
+    const totalInstances = totalPages * 10; // 10 is the limit per page from compare.js
     const avgPrice =
       sortedData.reduce((sum, item) => sum + (item.price || 0), 0) / sortedData.length;
     const minPrice = Math.min(...sortedData.map((item) => item.price || 0));
     const maxPrice = Math.max(...sortedData.map((item) => item.price || 0));
-    const totalInstances = sortedData.length;
 
     return { avgPrice, minPrice, maxPrice, totalInstances };
   };
@@ -322,7 +321,8 @@ function Explore() {
                 </div>
                 <h3 className="text-slate-500 font-medium">Instances</h3>
               </div>
-              <p className="text-2xl font-bold text-slate-800">
+              <p className="text-2xl font-bol
+d text-slate-800">
                 {stats.totalInstances}
               </p>
             </div>
@@ -426,7 +426,12 @@ function Explore() {
               className="overflow-hidden"
             >
               <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-slate-100">
-                <PriceFilters filters={filters} setFilters={setFilters} />
+                <PriceFilters
+                  filters={filters}
+                  setFilters={setFilters}
+                  selectedProviders={selectedProviders}
+                  setSelectedProviders={setSelectedProviders}
+                />
               </div>
             </motion.div>
           )}

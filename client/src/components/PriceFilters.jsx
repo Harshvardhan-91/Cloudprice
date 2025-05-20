@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Filter, X, Sliders, Cpu, HardDrive, Globe, Zap } from 'lucide-react';
 
-function PriceFilters({ filters, setFilters }) {
+function PriceFilters({ filters, setFilters, selectedProviders, setSelectedProviders }) {
   const providers = [
     { id: 'aws', name: 'AWS', color: 'orange' },
     { id: 'azure', name: 'Azure', color: 'blue' },
@@ -24,12 +24,11 @@ function PriceFilters({ filters, setFilters }) {
   ];
 
   const handleProviderToggle = (provider) => {
-    setFilters(prev => ({
-      ...prev,
-      providers: prev.providers.includes(provider)
-        ? prev.providers.filter(p => p !== provider)
-        : [...prev.providers, provider]
-    }));
+    setSelectedProviders(prev =>
+      prev.includes(provider)
+        ? prev.filter(p => p !== provider)
+        : [...prev, provider]
+    );
   };
 
   const handleRegionToggle = (region) => {
@@ -59,13 +58,13 @@ function PriceFilters({ filters, setFilters }) {
 
   const clearFilters = () => {
     setFilters({
-      providers: [],
       regions: [],
       vCPUs: [1, 16],
       ram: [1, 64],
       gpu: false,
       instanceTypes: [],
     });
+    setSelectedProviders(['aws', 'azure', 'gcp']);
   };
 
   return (
@@ -102,7 +101,7 @@ function PriceFilters({ filters, setFilters }) {
                 key={provider.id}
                 onClick={() => handleProviderToggle(provider.id)}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  filters.providers.includes(provider.id)
+                  selectedProviders.includes(provider.id)
                     ? `bg-${provider.color}-500 text-white`
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}

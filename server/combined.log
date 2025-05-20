@@ -434,3 +434,27 @@
 {"level":"info","message":"Received request: GET /api/v1/compare?providers=aws&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=2&searchTerm=","timestamp":"2025-05-20T17:19:30.849Z"}
 {"level":"info","message":"Received request: GET /api/v1/compare?providers=gcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T17:19:39.370Z"}
 {"level":"info","message":"Received request: GET /api/v1/compare?providers=gcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=2&searchTerm=","timestamp":"2025-05-20T17:19:56.637Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T17:21:58.700Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T17:21:58.703Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T17:21:58.704Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T17:21:58.705Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T17:21:58.705Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T17:21:58.705Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T17:21:58.712Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T17:21:59.320Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T17:22:10.757Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T17:29:25.615Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T17:29:25.618Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T17:29:25.618Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T17:29:25.619Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T17:29:25.619Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T17:29:25.620Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T17:29:25.626Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T17:29:26.280Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T17:29:37.470Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=gcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T17:29:43.824Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=azure&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T17:29:46.345Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T17:29:52.997Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T17:30:00.920Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=azure&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T17:30:05.241Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=azure&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T17:30:08.467Z"}
