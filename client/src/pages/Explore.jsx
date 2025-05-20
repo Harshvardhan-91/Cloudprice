@@ -81,8 +81,8 @@ function Explore() {
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     regions: [],
-    vCPUs: [0, 16], // Changed min from 1 to 0 to include Azure data
-    ram: [0, 64],   // Changed min from 1 to 0 to include Azure data
+    vCPUs: [0, 16],
+    ram: [0, 64],
     gpu: false,
     instanceTypes: [],
   });
@@ -118,9 +118,7 @@ function Explore() {
         filterParams.region = filters.regions[0];
       }
 
-      console.log("Fetching data with params:", filterParams);
       const res = await compareInstances(filterParams);
-      console.log("API response:", res);
 
       const transformedData = (res.data || []).map((item) => ({
         id: item.id,
@@ -147,7 +145,6 @@ function Explore() {
         setError(`No instances found matching the current filters.`);
       }
     } catch (err) {
-      console.error("Error in fetchData:", err);
       setError(`Unable to fetch the requested data: ${err.message}`);
       setData([]);
     } finally {
@@ -364,6 +361,7 @@ function Explore() {
         )}
 
         <motion.div
+          key={selectedProviders.join(",")} // Added to force animation re-run
           className="bg-white rounded-2xl shadow-lg p-5 mb-6 border border-slate-100"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -394,23 +392,26 @@ function Explore() {
             <div className="flex items-center gap-4 flex-wrap justify-center">
               <motion.button
                 onClick={toggleFilter}
-                className={`flex items-center gap-2 px-5 py-3 rounded-xl transition-all duration-200 ${
+                className={`flex items-center gap-2 px-5 py-3 rounded-xl transition-all duration-200 border border-slate-200 shadow-sm ${
                   isFilterOpen
-                    ? "bg-blue-50 text-blue-600 border border-blue-200"
-                    : "text-slate-700 hover:bg-slate-50 border border-slate-200"
+                    ? "bg-blue-50 text-blue-600 border-blue-200"
+                    : "bg-white text-slate-700 hover:bg-slate-50"
                 }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
               >
                 <Filter className="h-5 w-5" />
                 {isFilterOpen ? "Hide Filters" : "Show Filters"}
               </motion.button>
 
-              <div className="flex items-center rounded-xl border border-slate-200 overflow-hidden bg-white">
+              <div className="flex items-center rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-4 py-3 focus:outline-none text-slate-700 border-r border-slate-200"
+                  className="px-4 py-3 focus:outline-none text-slate-700 border-r border-slate-200 bg-white"
                 >
                   <option value="price">Sort by Price</option>
                   <option value="costPerCore">Sort by Cost/Core</option>
@@ -422,7 +423,7 @@ function Explore() {
                   onClick={() =>
                     setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                   }
-                  className="px-4 py-3 text-slate-700 hover:bg-slate-50 transition-colors flex items-center"
+                  className="px-4 py-3 text-slate-700 hover:bg-slate-50 transition-colors flex items-center bg-white"
                   aria-label={
                     sortOrder === "asc" ? "Sort ascending" : "Sort descending"
                   }

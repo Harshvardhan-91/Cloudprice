@@ -521,3 +521,75 @@
 {"level":"info","message":"Received request: GET /api/v1/compare?providers=azure&minCpu=1&maxCpu=44&minMemory=1&maxMemory=32&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:01:37.722Z"}
 {"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:04:39.655Z"}
 {"level":"info","message":"Received request: GET /api/v1/compare?providers=azure&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:05:03.201Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:06:24.818Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:06:25.994Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=gcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:06:30.868Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=azure&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:06:37.590Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:06:52.379Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=2&searchTerm=","timestamp":"2025-05-20T18:06:59.262Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=3&searchTerm=","timestamp":"2025-05-20T18:07:05.135Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=2&searchTerm=","timestamp":"2025-05-20T18:07:07.270Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:09:11.513Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:09:12.593Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=gcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:09:47.025Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:10:03.411Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=azure&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:10:17.022Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:13:13.666Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=gcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:13:19.492Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=azure&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:13:22.065Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:13:23.717Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:13:27.394Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:13:36.996Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=gcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:13:46.574Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:13:48.436Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=azure&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:13:50.068Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:14:04.382Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=azure&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:14:06.581Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:47:38.131Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:47:39.302Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=gcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:47:52.520Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:47:57.222Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=azure&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:48:00.727Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T18:50:30.274Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T18:50:30.277Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T18:50:30.278Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T18:50:30.279Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T18:50:30.279Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T18:50:30.280Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T18:50:30.288Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T18:50:30.918Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T18:51:10.896Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T18:51:10.900Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T18:51:10.900Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T18:51:10.901Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T18:51:10.901Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T18:51:10.901Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T18:51:10.908Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T18:51:11.431Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T18:53:11.083Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T18:53:11.086Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T18:53:11.087Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T18:53:11.088Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T18:53:11.088Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T18:53:11.089Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T18:53:11.095Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T18:53:11.720Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:53:54.657Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T18:55:40.618Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T18:55:40.621Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T18:55:40.622Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T18:55:40.622Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T18:55:40.622Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T18:55:40.623Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T18:55:40.628Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T18:55:41.298Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:55:42.246Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T18:58:32.042Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T18:58:32.044Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T18:58:32.045Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T18:58:32.045Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T18:58:32.046Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T18:58:32.046Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T18:58:32.052Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T18:58:32.627Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=0&maxCpu=16&minMemory=0&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T18:58:34.101Z"}

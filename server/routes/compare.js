@@ -2,6 +2,28 @@ const express = require('express');
 const router = express.Router();
 const logger = require('../utils/logger');
 const { v4: uuidv4 } = require('uuid');
+const cors = require('cors'); // Add CORS middleware
+
+// Read allowed origins from environment variable (comma-separated list)
+if (!process.env.FRONTEND_URL) {
+  throw new Error('FRONTEND_URL environment variable is not set. Please set it to the allowed frontend origin(s).');
+}
+const ALLOWED_ORIGINS = process.env.FRONTEND_URL.split(',');
+
+// Configure CORS to dynamically allow origins
+router.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS policy: Origin ${origin} is not allowed. Allowed origins: ${ALLOWED_ORIGINS.join(', ')}`));
+    }
+  },
+  methods: ['GET', 'POST', 'OPTIONS'], // Allow these HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
+  credentials: true, // If you need to send cookies or auth headers
+}));
 
 const CLOUDPRICE_API_KEY = process.env.CLOUDPRICE_API_KEY;
 const CLOUDPRICE_API_ENDPOINT = process.env.CLOUDPRICE_API_ENDPOINT;
