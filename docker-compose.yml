@@ -40,6 +40,8 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=credentials/gcp-credentials.json
       - RATE_LIMIT_WINDOW_MS=900000
       - RATE_LIMIT_MAX_REQUESTS=100
+      - CLOUDPRICE_API_KEY=${CLOUDPRICE_API_KEY}
+      - CLOUDPRICE_API_ENDPOINT=${CLOUDPRICE_API_ENDPOINT}
     volumes:
       - ./server:/app
       - ./server/node_modules:/app/node_modules
@@ -58,7 +60,7 @@ services:
     container_name: cloudprice-client
     restart: always
     environment:
-      - VITE_API_BASE_URL=/api/v1
+      - VITE_API_BASE_URL=http://server:3000/api/v1
     volumes:
       - ./client:/app
       - ./client/node_modules:/app/node_modules

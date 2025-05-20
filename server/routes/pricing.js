@@ -7,31 +7,17 @@ const logger = require('../utils/logger');
 router.get('/aws', async (req, res) => {
   try {
     logger.info('Fetching AWS instances');
-    const cloudProviderService = require('../services/cloudProviderService');
     
-    // Try to get instances from database first
-    let instances = [];
-    try {
-      instances = await Instance.find({ provider: 'aws' }).limit(100);
-      logger.info(`Found ${instances.length} AWS instances in database`);
-    } catch (dbError) {
-      logger.warn('Database error, falling back to direct API fetch:', dbError);
-    }
-    
-    // If database doesn't have instances, fetch directly from API
+    // Try to get instances from database
+    const instances = await Instance.find({ provider: 'aws' }).limit(100);
+    logger.info(`Found ${instances.length} AWS instances in database`);
+
     if (instances.length === 0) {
-      logger.info('No AWS instances found in database, fetching from API');
-      instances = await cloudProviderService.fetchAWSInstances();
-      
-      // Try to save to database for future use
-      try {
-        if (instances.length > 0 && instances[0].instanceType !== 't2.micro') {
-          await Instance.insertMany(instances, { ordered: false });
-          logger.info(`Saved ${instances.length} AWS instances to database`);
-        }
-      } catch (saveError) {
-        logger.warn('Failed to save instances to database:', saveError);
-      }
+      logger.info('No AWS instances found in database');
+      return res.status(404).json({
+        status: 'error',
+        message: 'No AWS instances found. Please use the /compare endpoint to fetch data via the CloudPrice API.',
+      });
     }
     
     res.json({ status: 'success', data: instances });
@@ -45,31 +31,17 @@ router.get('/aws', async (req, res) => {
 router.get('/gcp', async (req, res) => {
   try {
     logger.info('Fetching GCP instances');
-    const cloudProviderService = require('../services/cloudProviderService');
     
-    // Try to get instances from database first
-    let instances = [];
-    try {
-      instances = await Instance.find({ provider: 'gcp' }).limit(100);
-      logger.info(`Found ${instances.length} GCP instances in database`);
-    } catch (dbError) {
-      logger.warn('Database error, falling back to direct API fetch:', dbError);
-    }
-    
-    // If database doesn't have instances, fetch directly from API
+    // Try to get instances from database
+    const instances = await Instance.find({ provider: 'gcp' }).limit(100);
+    logger.info(`Found ${instances.length} GCP instances in database`);
+
     if (instances.length === 0) {
-      logger.info('No GCP instances found in database, fetching from API');
-      instances = await cloudProviderService.fetchGCPInstances();
-      
-      // Try to save to database for future use
-      try {
-        if (instances.length > 0 && instances[0].instanceType !== 'e2-micro') {
-          await Instance.insertMany(instances, { ordered: false });
-          logger.info(`Saved ${instances.length} GCP instances to database`);
-        }
-      } catch (saveError) {
-        logger.warn('Failed to save instances to database:', saveError);
-      }
+      logger.info('No GCP instances found in database');
+      return res.status(404).json({
+        status: 'error',
+        message: 'No GCP instances found. Please use the /compare endpoint to fetch data via the CloudPrice API.',
+      });
     }
     
     res.json({ status: 'success', data: instances });
@@ -83,31 +55,17 @@ router.get('/gcp', async (req, res) => {
 router.get('/azure', async (req, res) => {
   try {
     logger.info('Fetching Azure instances');
-    const cloudProviderService = require('../services/cloudProviderService');
     
-    // Try to get instances from database first
-    let instances = [];
-    try {
-      instances = await Instance.find({ provider: 'azure' }).limit(100);
-      logger.info(`Found ${instances.length} Azure instances in database`);
-    } catch (dbError) {
-      logger.warn('Database error, falling back to direct API fetch:', dbError);
-    }
-    
-    // If database doesn't have instances, fetch directly from API
+    // Try to get instances from database
+    const instances = await Instance.find({ provider: 'azure' }).limit(100);
+    logger.info(`Found ${instances.length} Azure instances in database`);
+
     if (instances.length === 0) {
-      logger.info('No Azure instances found in database, fetching from API');
-      instances = await cloudProviderService.fetchAzureInstances();
-      
-      // Try to save to database for future use
-      try {
-        if (instances.length > 0 && instances[0].instanceType !== 'D2s_v3') {
-          await Instance.insertMany(instances, { ordered: false });
-          logger.info(`Saved ${instances.length} Azure instances to database`);
-        }
-      } catch (saveError) {
-        logger.warn('Failed to save instances to database:', saveError);
-      }
+      logger.info('No Azure instances found in database');
+      return res.status(404).json({
+        status: 'error',
+        message: 'No Azure instances found. Please use the /compare endpoint to fetch data via the CloudPrice API.',
+      });
     }
     
     res.json({ status: 'success', data: instances });
@@ -189,6 +147,13 @@ router.get('/', async (req, res) => {
       .limit(100);
 
     logger.info(`Found ${instances.length} instances with filters`);
+    if (instances.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'No instances found in the database. Please use the /compare endpoint to fetch data via the CloudPrice API.',
+      });
+    }
+
     res.json({
       status: 'success',
       data: instances
@@ -221,6 +186,13 @@ router.post('/compare', async (req, res) => {
       .limit(10);
 
     logger.info(`Found ${instances.length} instances for comparison`);
+    if (instances.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'No instances found in the database. Please use the /compare endpoint to fetch data via the CloudPrice API.',
+      });
+    }
+
     res.json({
       status: 'success',
       data: instances

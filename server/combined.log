@@ -161,3 +161,245 @@
 {"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-17T08:03:52.133Z"}
 {"level":"info","message":"Server running on port 3000","timestamp":"2025-05-17T08:05:19.619Z"}
 {"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-17T08:05:20.203Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-17T18:36:55.824Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-17T18:36:56.522Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-17T18:37:07.081Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-17T18:37:07.579Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-17T18:37:17.470Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-17T18:37:18.001Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:26:40.774Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:26:41.417Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:33:55.445Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:33:56.353Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:34:21.317Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:34:21.928Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:34:42.157Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:34:42.877Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:34:56.972Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:34:57.705Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:35:13.019Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:35:13.769Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:38:41.527Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:38:42.205Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:42:31.127Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:42:31.131Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:42:31.132Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:42:31.132Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:42:31.133Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:42:31.134Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:42:31.140Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:42:31.747Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T10:42:38.039Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:43:15.744Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:43:15.747Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:43:15.748Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:43:15.749Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:43:15.749Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:43:15.750Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:43:15.758Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:43:16.313Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:43:49.373Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:43:49.377Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:43:49.378Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:43:49.379Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:43:49.379Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:43:49.380Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:43:49.387Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:43:50.082Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T10:43:54.029Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:45:23.478Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:45:23.482Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:45:23.483Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:45:23.484Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:45:23.485Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:45:23.486Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:45:23.493Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:45:24.077Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:46:55.554Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:46:55.558Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:46:55.559Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:46:55.560Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:46:55.560Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:46:55.561Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:46:55.568Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:46:56.297Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:47:31.528Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:47:31.533Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:47:31.534Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:47:31.534Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:47:31.535Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:47:31.535Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:47:31.540Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:47:32.190Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:47:48.610Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:47:48.614Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:47:48.615Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:47:48.615Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:47:48.616Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:47:48.616Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:47:48.623Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:47:49.280Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:48:07.630Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:48:07.633Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:48:07.634Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:48:07.634Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:48:07.634Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:48:07.635Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:48:07.640Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:48:08.294Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:48:25.578Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:48:25.582Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:48:25.582Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:48:25.583Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:48:25.583Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:48:25.583Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:48:25.588Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:48:26.189Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T10:49:02.148Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:50:16.929Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:50:16.932Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:50:16.933Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:50:16.934Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:50:16.934Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:50:16.935Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:50:16.941Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:50:17.769Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T10:50:24.157Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:55:05.005Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:55:05.009Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:55:05.009Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:55:05.010Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:55:05.010Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:55:05.011Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:55:05.017Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:55:05.695Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T10:55:31.384Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:56:06.939Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:56:06.944Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:56:06.945Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:56:06.946Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:56:06.946Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:56:06.946Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:56:06.951Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:56:07.622Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:56:15.739Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:56:15.743Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:56:15.744Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:56:15.744Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:56:15.746Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:56:15.746Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:56:15.752Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:56:18.317Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:56:32.189Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:56:32.193Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:56:32.194Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:56:32.195Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:56:32.195Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:56:32.195Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:56:32.199Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:56:32.835Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T10:56:37.275Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T10:57:08.875Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T10:57:08.877Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T10:57:08.878Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T10:57:08.880Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T10:57:08.881Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T10:57:08.881Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T10:57:08.888Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T10:57:09.592Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T11:05:49.669Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T11:05:49.677Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T11:05:49.679Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T11:05:49.685Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T11:05:49.686Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T11:05:49.688Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T11:05:49.706Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T11:05:50.508Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T11:05:55.290Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T11:06:37.546Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T11:06:37.555Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T11:06:37.557Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T11:06:37.558Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T11:06:37.559Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T11:06:37.561Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T11:06:37.581Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T11:06:38.351Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T11:23:01.540Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T11:23:01.556Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T11:23:01.557Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T11:23:01.558Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T11:23:01.558Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T11:23:01.559Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T11:23:01.566Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T11:23:02.205Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T11:23:24.775Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T11:23:55.543Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T11:23:55.545Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T11:23:55.546Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T11:23:55.547Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T11:23:55.547Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T11:23:55.547Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T11:23:55.555Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T11:23:56.123Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T11:24:00.609Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T11:25:55.619Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T11:25:55.625Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T11:25:55.628Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T11:25:55.628Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T11:25:55.629Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T11:25:55.630Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T11:25:55.640Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T11:25:56.262Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T11:25:59.725Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T11:28:32.956Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T11:28:32.958Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T11:28:32.959Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T11:28:32.961Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T11:28:32.961Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T11:28:32.961Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T11:28:32.966Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T11:28:33.583Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T11:28:39.324Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T11:30:35.671Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T11:30:35.675Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T11:30:35.675Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T11:30:35.676Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T11:30:35.676Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T11:30:35.676Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T11:30:35.681Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T11:30:36.293Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T11:31:12.216Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T11:31:56.600Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T11:31:56.603Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T11:31:56.603Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T11:31:56.604Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T11:31:56.604Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T11:31:56.604Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T11:31:56.608Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T11:31:57.333Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T11:32:00.998Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T11:33:53.134Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T11:33:53.137Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T11:33:53.137Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T11:33:53.138Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T11:33:53.138Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T11:33:53.138Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T11:33:53.144Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T11:33:53.953Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T11:35:20.313Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T11:35:20.321Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T11:35:20.322Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T11:35:20.322Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T11:35:20.323Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T11:35:20.323Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T11:35:20.327Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T11:35:20.974Z"}
+{"level":"info","message":"Mounting routes...","timestamp":"2025-05-20T11:35:35.303Z"}
+{"level":"info","message":"Mounting /api/v1/pricing","timestamp":"2025-05-20T11:35:35.307Z"}
+{"level":"info","message":"Mounting /api/v1/comparison","timestamp":"2025-05-20T11:35:35.308Z"}
+{"level":"info","message":"Mounting /api/v1/compare","timestamp":"2025-05-20T11:35:35.308Z"}
+{"level":"info","message":"Mounting /api/v1/providers","timestamp":"2025-05-20T11:35:35.309Z"}
+{"level":"info","message":"Mounting /api/v1/instances","timestamp":"2025-05-20T11:35:35.309Z"}
+{"level":"info","message":"Server running on port 3000","timestamp":"2025-05-20T11:35:35.314Z"}
+{"level":"info","message":"Connected to MongoDB","timestamp":"2025-05-20T11:35:35.991Z"}
+{"level":"info","message":"Received request: GET /api/v1/compare?providers=aws%2Cazure%2Cgcp&minCpu=1&maxCpu=16&minMemory=1&maxMemory=64&gpu=false&sortBy=pricing.onDemand&sortOrder=asc&page=1&searchTerm=","timestamp":"2025-05-20T11:35:40.318Z"}

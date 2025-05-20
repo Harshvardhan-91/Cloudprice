@@ -17,6 +17,8 @@ console.log('AZURE_CLIENT_SECRET:', process.env.AZURE_CLIENT_SECRET ? 'Set' : 'N
 console.log('AWS_ACCESS_KEY_ID:', process.env.AWS_ACCESS_KEY_ID);
 console.log('GOOGLE_PROJECT_ID:', process.env.GOOGLE_PROJECT_ID);
 console.log('GOOGLE_APPLICATION_CREDENTIALS:', process.env.GOOGLE_APPLICATION_CREDENTIALS);
+console.log('CLOUDPRICE_API_KEY:', process.env.CLOUDPRICE_API_KEY ? 'Set' : 'Not set');
+console.log('CLOUDPRICE_API_ENDPOINT:', process.env.CLOUDPRICE_API_ENDPOINT ? 'Set' : 'Not set');
 
 // Initialize Express app
 const app = express();
@@ -54,8 +56,14 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => logger.info('Connected to MongoDB'))
   .catch(err => {
     logger.warn('MongoDB connection failed, continuing without database:', err);
-    logger.warn('The application will fetch pricing data directly from APIs');
+    logger.warn('The application will fetch pricing data directly from the CloudPrice API');
   });
+
+// Debug: Log all incoming requests
+app.use((req, res, next) => {
+  logger.info(`Received request: ${req.method} ${req.originalUrl}`);
+  next();
+});
 
 // Routes
 const pricingRoutes = require('./routes/pricing');
@@ -63,11 +71,17 @@ const comparisonRoutes = require('./routes/comparison');
 const compareRoutes = require('./routes/compare');
 const { providerRouter, instancesRouter } = require('./routes/providers');
 
-// Mount routes
+// Debug: Log route mounting
+logger.info('Mounting routes...');
+logger.info('Mounting /api/v1/pricing');
 app.use('/api/v1/pricing', pricingRoutes);
+logger.info('Mounting /api/v1/comparison');
 app.use('/api/v1/comparison', comparisonRoutes);
+logger.info('Mounting /api/v1/compare');
 app.use('/api/v1/compare', compareRoutes);
+logger.info('Mounting /api/v1/providers');
 app.use('/api/v1/providers', providerRouter);
+logger.info('Mounting /api/v1/instances');
 app.use('/api/v1/instances', instancesRouter);
 
 // Health check endpoint

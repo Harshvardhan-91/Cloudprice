@@ -1,296 +1,189 @@
 const express = require('express');
 const router = express.Router();
-const Instance = require('../models/Instance');
 const logger = require('../utils/logger');
+const { v4: uuidv4 } = require('uuid');
 
-// Get instances across all providers with advanced filtering
-router.get('/', async (req, res) => {
-  try {
-    const { 
-      providers, 
-      region, 
-      minCpu, 
-      maxCpu, 
-      minMemory, 
-      maxMemory,
-      minPrice,
-      maxPrice,
-      category,
-      gpu,
-      searchTerm
-    } = req.query;
-    
-    // Build filter based on query parameters
-    const filter = {};
-    
-    // Handle multiple providers
-    if (providers) {
-      const providerList = providers.split(',');
-      filter.provider = { $in: providerList };
-    }
-    
-    if (region) {
-      // Handle region pattern matching (since different providers format regions differently)
-      filter.region = { $regex: region, $options: 'i' };
-    }
-    
-    if (minCpu || maxCpu) {
-      filter['specs.vCPUs'] = {};
-      if (minCpu) filter['specs.vCPUs'].$gte = parseInt(minCpu);
-      if (maxCpu) filter['specs.vCPUs'].$lte = parseInt(maxCpu);
-    }
-      if (minMemory || maxMemory) {
-      filter['specs.memory'] = {};
-      if (minMemory) filter['specs.memory'].$gte = parseFloat(minMemory);
-      if (maxMemory) filter['specs.memory'].$lte = parseFloat(maxMemory);
-    }
-    
-    if (minPrice || maxPrice) {
-      filter['pricing.onDemand'] = {};
-      if (minPrice) filter['pricing.onDemand'].$gte = parseFloat(minPrice);
-      if (maxPrice) filter['pricing.onDemand'].$lte = parseFloat(maxPrice);
-    }
-    
-    // If GPU filter is specified
-    if (gpu !== undefined) {
-      filter['specs.gpu'] = gpu === 'true';
-    }
-    
-    if (category) {
-      filter.category = category;
-    }
-    
-    if (gpu) {
-      filter['specs.gpu'] = gpu === 'true';
-    }
-    
-    // Search by instance type
-    if (searchTerm) {
-      filter.instanceType = { $regex: searchTerm, $options: 'i' };
-    }
-    
-    logger.info('Comparison filter:', filter);
-    
-    // Get sort parameters or use defaults
-    const sortField = req.query.sortBy || 'pricing.onDemand';
-    const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1;
-    const sort = { [sortField]: sortOrder };
-    
-    // Apply pagination
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 100;
-    const skip = (page - 1) * limit;
-      // Execute query
-    const instances = await Instance.find(filter)
-      .sort(sort)
-      .skip(skip)
-      .limit(limit);
-      
-    // If no instances found in database, try to fetch directly from provider APIs
-    if (!instances || instances.length === 0) {
-      logger.info('No instances found in database, fetching from provider APIs');
-      
-      const cloudProviderService = require('../services/cloudProviderService');
-      const providerList = filter.provider?.$in || ['aws', 'azure', 'gcp'];
-      
-      let allFetchedInstances = [];
-      
-      // Fetch instances from each provider
-      for (const provider of providerList) {
-        try {
-          let providerInstances = [];
-          
-          if (provider === 'aws') {
-            providerInstances = await cloudProviderService.fetchAWSInstances();
-          } else if (provider === 'gcp') {
-            providerInstances = await cloudProviderService.fetchGCPInstances();
-          } else if (provider === 'azure') {
-            providerInstances = await cloudProviderService.fetchAzureInstances();
-          }
-          
-          logger.info(`Fetched ${providerInstances.length} instances from ${provider} API`);
-          allFetchedInstances = [...allFetchedInstances, ...providerInstances];
-        } catch (error) {
-          logger.error(`Error fetching instances from ${provider} API:`, error);
-        }
-      }
-      
-      // If we fetched instances, apply filters and processing
-      if (allFetchedInstances.length > 0) {
-        // Filter the fetched instances based on our criteria
-        const filteredInstances = allFetchedInstances.filter(instance => {
-          // Apply vCPU filter
-          if (filter['specs.vCPUs']) {
-            if (filter['specs.vCPUs'].$gte && instance.specs.vCPUs < filter['specs.vCPUs'].$gte) return false;
-            if (filter['specs.vCPUs'].$lte && instance.specs.vCPUs > filter['specs.vCPUs'].$lte) return false;
-          }
-          
-          // Apply memory filter
-          if (filter['specs.memory']) {
-            if (filter['specs.memory'].$gte && instance.specs.memory < filter['specs.memory'].$gte) return false;
-            if (filter['specs.memory'].$lte && instance.specs.memory > filter['specs.memory'].$lte) return false;
-          }
-          
-          // Apply GPU filter
-          if (filter['specs.gpu'] !== undefined && instance.specs.gpu !== filter['specs.gpu']) return false;
-          
-          // Apply category filter
-          if (filter.category && instance.category !== filter.category) return false;
-          
-          // Apply search term filter
-          if (filter.instanceType && filter.instanceType.$regex) {
-            const regex = new RegExp(filter.instanceType.$regex, filter.instanceType.$options || '');
-            if (!regex.test(instance.instanceType)) return false;
-          }
-          
-          return true;
-        });
-        
-        // Apply derived fields
-        const processedFetchedInstances = filteredInstances.map(instance => {
-          const data = typeof instance.toObject === 'function' ? instance.toObject() : instance;
-          data.costPerVCPU = data.pricing.onDemand / data.specs.vCPUs;
-          data.costPerGB = data.pricing.onDemand / data.specs.memory;
-          return data;
-        });
-        
-        // Use the fetched instances for our response
-        return res.json({
-          status: 'success',
-          data: processedFetchedInstances,
-          pagination: {
-            total: processedFetchedInstances.length,
-            page: 1,
-            limit: processedFetchedInstances.length,
-            pages: 1,
-            note: 'Results fetched directly from cloud provider APIs'
-          }
-        });
-      }
-    }
-    
-    // Process data to add derived fields for easier comparison
-    const processedInstances = instances.map(instance => {
-      const data = instance.toObject();
-      data.costPerVCPU = data.pricing.onDemand / data.specs.vCPUs;
-      data.costPerGB = data.pricing.onDemand / data.specs.memory;
-      return data;
-    });
-    
-    // Get total count for pagination
-    const total = await Instance.countDocuments(filter);
-    
-    res.json({
-      status: 'success',
-      data: processedInstances,
-      pagination: {
-        total,
-        page,
-        limit,
-        pages: Math.ceil(total / limit)
-      }
-    });
-  } catch (error) {
-    logger.error('Error in comparison route:', error);
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
-  }
-});
+const CLOUDPRICE_API_KEY = process.env.CLOUDPRICE_API_KEY;
+const CLOUDPRICE_API_ENDPOINT = process.env.CLOUDPRICE_API_ENDPOINT;
 
-// Get best price comparison for specific configuration
-router.post('/best-price', async (req, res) => {
+// Helper function to fetch instances for a provider
+const fetchInstancesForProvider = async (provider) => {
   try {
-    const { vCPUs, memory, gpu } = req.body;
-    
-    if (!vCPUs || !memory) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'vCPUs and memory are required parameters'
-      });
-    }
-    
-    // Find instances with the closest specs
-    const filter = {
-      'specs.vCPUs': { $gte: vCPUs * 0.8, $lte: vCPUs * 1.2 },
-      'specs.memory': { $gte: memory * 0.8, $lte: memory * 1.2 }
+    // Map provider to the correct endpoint path
+    const providerPaths = {
+      'aws': 'aws/ec2/instances',
+      'gcp': 'gcp/compute/instances',
+      'azure': 'azure/regions' // Updated to the correct Azure endpoint
     };
     
-    if (gpu !== undefined) {
-      filter['specs.gpu'] = gpu === true;
-    }
+    const providerPath = providerPaths[provider] || provider;
+    const url = `${CLOUDPRICE_API_ENDPOINT}/api/v2/${providerPath}`;
     
-    const instances = await Instance.find(filter)
-      .sort({ 'pricing.onDemand': 1 })
-      .limit(10);
+    logger.info(`Fetching data for ${provider} from URL: ${url}`);
     
-    // Calculate price-performance metrics
-    const results = instances.map(instance => {
-      const data = instance.toObject();
-      data.costPerVCPU = data.pricing.onDemand / data.specs.vCPUs;
-      data.costPerGB = data.pricing.onDemand / data.specs.memory;
-      data.pricePerformanceScore = data.specs.vCPUs * data.specs.memory / (data.pricing.onDemand * 1000);
-      return data;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'subscription-key': CLOUDPRICE_API_KEY,
+      },
     });
-    
-    // Sort by best price-performance
-    results.sort((a, b) => b.pricePerformanceScore - a.pricePerformanceScore);
-    
-    res.json({
-      status: 'success',
-      data: results
-    });
-  } catch (error) {
-    logger.error('Error in best-price comparison:', error);
-    res.status(500).json({
-      status: 'error',
-      message: error.message
-    });
-  }
-});
 
-// Get side-by-side comparison of specific instances
-router.post('/side-by-side', async (req, res) => {
-  try {
-    const { instanceIds } = req.body;
-    
-    if (!instanceIds || !Array.isArray(instanceIds)) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'instanceIds must be an array of instance IDs'
-      });
+    if (!response.ok) {
+      logger.error(`CloudPrice API error for ${provider}: ${response.status} ${response.statusText}`);
+      return [];
     }
+
+    const data = await response.json();
+    logger.info(`Successfully fetched data for ${provider}`);
+
+    // Log raw response (limit to first 1000 characters to avoid truncation)
+    const responseString = JSON.stringify(data, null, 2).substring(0, 1000);
+    logger.info(`Raw response for ${provider} (first 1000 chars): ${responseString}`);
+
+    // Handle response format based on provider
+    let instances = [];
     
-    const instances = await Instance.find({
-      _id: { $in: instanceIds }
-    });
-    
-    if (instances.length === 0) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'No matching instances found'
-      });
+    if (provider === 'azure') {
+      // Azure endpoint returns region data, not instances
+      logger.info(`Does data.Data exist and is it an array? ${data.Data && Array.isArray(data.Data)}`);
+      if (data.Data && Array.isArray(data.Data)) {
+        logger.info(`Found region data in data.Data field for Azure`);
+        // Transform region data into a pseudo-instance format
+        instances = data.Data.map(region => ({
+          provider: provider,
+          Region: region.Region || 'unknown',
+          AveragePricePerHour: region.AveragePricePerHour || 0,
+          Currency: region.Currency || 'USD',
+          // Pseudo-instance fields to match the schema
+          InstanceType: `avg-${region.Region}`, // Placeholder instance type
+          InstanceFamily: 'Region Average',
+          ProcessorVCPUCount: 0, // Not available in region data
+          MemorySizeInMB: 0,    // Not available in region data
+          GPUCount: 0,
+          GPUType: null,
+          ProcessorArchitecture: ['x86_64'] // Default value
+        }));
+      } else {
+        logger.error(`Unexpected response format for ${provider}: No valid region array found`);
+        return [];
+      }
+    } else {
+      // AWS and GCP endpoints return instance data
+      logger.info(`Does data.Data.Items exist and is it an array? ${data.Data && data.Data.Items && Array.isArray(data.Data.Items)}`);
+      if (data.Data && data.Data.Items && Array.isArray(data.Data.Items)) {
+        logger.info(`Found instance array in data.Data.Items field`);
+        instances = data.Data.Items.map(item => ({
+          ...item,
+          provider: provider,
+          Region: item.Region || (data.Data && data.Data.Region) || 'unknown',
+        }));
+      } else if (Array.isArray(data)) {
+        logger.info(`Found instance array directly in data`);
+        instances = data.map(item => ({
+          ...item,
+          provider: provider,
+          Region: item.Region || 'unknown',
+        }));
+      } else {
+        logger.error(`Unexpected response format for ${provider}: No valid instance array found`);
+        return [];
+      }
     }
-    
-    // Enhance with comparison metrics
-    const comparison = instances.map(instance => {
-      const data = instance.toObject();
-      data.costPerVCPU = data.pricing.onDemand / data.specs.vCPUs;
-      data.costPerGB = data.pricing.onDemand / data.specs.memory;
-      data.monthlyCost = data.pricing.onDemand * 730; // ~730 hours in a month
-      return data;
-    });
-    
-    res.json({
-      status: 'success',
-      data: comparison
-    });
+
+    return instances;
   } catch (error) {
-    logger.error('Error in side-by-side comparison:', error);
+    logger.error(`Error fetching data for ${provider}:`, error);
+    return [];
+  }
+};
+
+// Proxy to CloudPrice API to fetch data for all providers
+router.get('/', async (req, res) => {
+  try {
+    logger.info('Fetching data for all providers from CloudPrice API');
+
+    // Extract providers from query (default to all if not specified)
+    const providers = req.query.providers
+      ? req.query.providers.split(',')
+      : ['aws', 'azure', 'gcp'];
+
+    // Fetch data for each provider concurrently
+    const fetchPromises = providers.map(provider =>
+      fetchInstancesForProvider(provider)
+    );
+    const results = await Promise.all(fetchPromises);
+
+    // Combine results from all providers
+    let combinedInstances = results.flat();
+
+    // Filter instances based on query parameters (client-side filtering)
+    if (req.query.minCpu || req.query.maxCpu || req.query.minMemory || req.query.maxMemory) {
+      const minVCPUs = parseInt(req.query.minCpu) || 0;
+      const maxVCPUs = parseInt(req.query.maxCpu) || Infinity;
+      const minRam = parseInt(req.query.minMemory) || 0;
+      const maxRam = parseInt(req.query.maxMemory) || Infinity;
+
+      combinedInstances = combinedInstances.filter(item => {
+        const vCPUs = item.ProcessorVCPUCount || item.vCPUs || item.specs?.vCPUs || 0;
+        const ram = (item.MemorySizeInMB || item.ram || item.specs?.memory || 0) / 1024;
+        return vCPUs >= minVCPUs && vCPUs <= maxVCPUs && ram >= minRam && ram <= maxRam;
+      });
+    }
+
+    // If no instances are returned, provide a fallback response
+    if (combinedInstances.length === 0) {
+      logger.warn('No data fetched from any provider');
+      return res.status(200).json([]);
+    }
+
+    // Transform the combined data to match the expected schema
+    const transformedData = combinedInstances.map(item => {
+      const provider = item.provider ? item.provider.toLowerCase() : 'unknown';
+      const vCPUs = item.ProcessorVCPUCount || item.vCPUs || item.specs?.vCPUs || 0;
+      const ram = item.MemorySizeInMB || item.ram || item.specs?.memory || 0;
+      const price = item.AveragePricePerHour || item.PricePerHour || item.price || item.pricing?.onDemand || 0;
+
+      return {
+        id: item.id || uuidv4(),
+        provider: provider,
+        instanceType: item.InstanceType || 'unknown',
+        region: item.Region || 'unknown',
+        vCPUs: vCPUs,
+        ram: ram / 1024, // Convert MB to GB
+        price: price,
+        costPerCore: vCPUs > 0 ? price / vCPUs : 0,
+        costPerGB: ram > 0 ? price / (ram / 1024) : 0,
+        category: item.InstanceFamily || 'general',
+        gpu: (item.GPUCount || item.GPU || item.specs?.gpu || 0) > 0,
+        gpuType: item.GPUType || item.specs?.gpuType || undefined,
+        specs: {
+          architecture: item.ProcessorArchitecture?.[0] || 'x86_64',
+          networkThroughput: item.NetworkingPerformance || 'Up to 10 Gbps',
+          storage: item.InstanceStorage || 'EBS Only',
+        },
+        reserved: item.reserved || item.pricing?.reserved || undefined,
+        spot: item.spot || item.pricing?.spot || undefined,
+      };
+    });
+
+    // Apply sorting if specified (client-side sorting since API may not support it)
+    if (req.query.sortBy && req.query.sortOrder) {
+      const sortKey = req.query.sortBy === 'pricing.onDemand' ? 'price' : req.query.sortBy;
+      const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1;
+      transformedData.sort((a, b) => {
+        const aValue = a[sortKey] || 0;
+        const bValue = b[sortKey] || 0;
+        return (aValue - bValue) * sortOrder;
+      });
+    }
+
+    res.json(transformedData);
+  } catch (error) {
+    logger.error('Error fetching data from CloudPrice API:', error);
     res.status(500).json({
       status: 'error',
-      message: error.message
+      message: 'Failed to fetch data from CloudPrice API',
+      error: error.message,
     });
   }
 });
